@@ -1,16 +1,19 @@
 [{
         "Name": "Indian Premier League",
         "Code": "IPL",
-        "Description": "This league consists of teams based in India"
+        "Description": "This league consists of teams based in India",
+        "Img": "images/ipl_2019.jpg"
     },
     {
         "Name": "Women T20 Challenge",
         "Code": "WT20",
-        "Description": "This league consists of only women cricketer based in India - playing 20-20"
+        "Description": "This league consists of only women cricketer based in India - playing 20-20",
+        "Img": "images/womensLeague.jpg"
     },
     {
         "Name": "Rural Youth T20 league",
         "Code": "YT20",
-        "Description": "This league consists teams based all over the world - playing 50-50"
+        "Description": "This league consists teams based all over the world - playing 50-50",
+        "Img": "images/village_league.jpg"
     }
 ]

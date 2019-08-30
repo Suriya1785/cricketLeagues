@@ -169,6 +169,21 @@ app.get("/index.html", function(req, res) {
 // ------------------------------------------------------------------------------
 // THIS CODE ALLOWS REQUESTS FOR THE API THROUGH 
 
+// GET QUOTE TAGS
+app.get("/api/quotes", function(req, res) {
+    console.log("Received a GET request for quotes");
+
+    let data = fs.readFileSync(__dirname + "/data/quotes.json", "utf8");
+    data = JSON.parse(data);
+
+    // console.log("Returned leagues are: ");
+    // for(let i = 0; i < data.length; i++) {
+    //   console.log("League: " + data[i].Name);
+    // }
+    res.end(JSON.stringify(data));
+});
+
+
 // GET LEAGUES
 app.get("/api/leagues", function(req, res) {
     console.log("Received a GET request for leagues");
@@ -545,7 +560,7 @@ app.delete("/api/teams/:teamid/members/:memberid", urlencodedParser, function(re
     console.log("Found team!");
 
     // find existing member on the team
-    let foundAt = team.Members.findIndex(m => m.MemberId == req.body.memberid);
+    let foundAt = team.Members.findIndex(m => m.MemberId == memberId);
 
     let match = null;
     // delete the member if found

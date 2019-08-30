@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Font Awesome: https://fontawesome.com/icons?d=gallery&m=free -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+    <!-- Add shortcut Icon-->
+    <link rel="shortcut icon" href="./images/favicon.jpg" type="image/x-ixon" />
+
+    <!-- custom css-->
+    <link rel="stylesheet" href="css/sites.css" />
+
+    <title>CricketLeagues</title>
+</head>
+
+<body>
+    <!-- Start Body -->
+
+    <!-- Navigation to applicable web functions within the same page -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-info">
+        <a class="navbar-brand" id="logoAnchor" href="#"><img class="rounded-circle" src="images/siteLogo.png" alt="siteLogoMissing">cricketLeagues</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBtn" aria-controls="navbarBtn" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarBtn">
+            <ul class="navbar-nav">
+                <li class="nav-item" id="home">
+                    <a class="nav-link" id="homeAnchor" href="#">Home</a>
+                </li>
+                <li class="nav-item" id="services">
+                    <a class="nav-link" id="leaguesAnchor" href="#">Leagues</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header of the page outlining the logo-->
+    <header>
+        <div class="jumbotron bgMediumImage" id="headerDiv">
+            <div class="container text-right">
+                <h1 class="trend-title display-5 text-white font-italic">Creckett Cryce Cricc Cricket</h1>
+                <h2 class="font-italic display-5 text-white font-weight-light">Bring in/Team Skills, Social Skills and Interactions</h2>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content - Vision of the website-->
+    <main>
+        <div class="container" id="contentDiv">
+            <!-- Home Page Section-->
+            <!-- <section class="row" id="homeSection">
+                <div class="col-md-3" id="readerBoard">
+                    <h2 class="center">Cricket is world's second most watching and followed sport.</h2>
+                    
+                    <p class="text-align-center fonthandler">See the hot trend below from ongoing leagues</p>
+                    <ul class="list-unstyled list-inline">
+                        <li class="list-inline-item">
+                            <a class="non-underline-link" href="#">
+                                <span class="text-secondary text-center">Royal Challengers Bangalore</span></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="non-underline-link" href="#"><span class="text-secondary text-center">Chennai Super Kings</span></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6" id="leagueList">
+                    <p class="font-weight-bold font-italic">List of Ongoing Leagues</p>
+                    <ul class="list-unstyled list-inline">
+                        <li class="list-inline-item">
+                            <a class="non-underline-link" href="#">
+                                <img class="hideimage" src="images/ipl_2019.jpg" alt="ipl2019Missing">
+                                <br>
+                                <span class="text-secondary text-center">IPL</span>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="non-underline-link" href="#">
+                                <img class="hideimage" src="images/village_league.jpg" alt="villageLeagueMissing">
+                                <br>
+                                <span class="text-secondary text-center">Youth League</span>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="non-underline-link" href="#">
+                                <img class="hideimage" src="images/womensLeague.jpg" alt="womensLeagueMissing">
+                                <br>
+                                <span class="text-secondary text-center">Women League</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="justify-content-center col-md-3" id="addlInfo">
+                    <div class="row" id="quotesDiv">
+                        
+                        <blockquote class="blockquote font-italic">
+                            <p>Cricket is not everything, not by any means, but it is a large part of who I am.
+                            </p>
+                            <footer class="text-info">
+                                -MS Dhoni
+                            </footer>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="videoInfo">
+                        <h3 class="Center">Cricket Latest Buzz</h3>
+                        <iframe class="imageWidth" src="https://www.youtube.com/embed/Kwu1yIC-ssg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </section> -->
+        </div>
+        <!-- Error message block for server responses -->
+        <div>
+            <p id="errorMsgId"></p>
+        </div>
+    </main>
+
+    <hr />
+
+    <footer class="footer" id="footerDiv">
+        <!-- Start of footer -->
+        <!-- links to our parental sites-->
+        <div class="row justify-content-center">
+            <h5 class="display-5 font-weight-light">Follow more info about Cricket on public Sites <span class="font-italic font-weight-bold">ICC</span> On social</h5>
+        </div>
+        <!--  links to Parent Sites-->
+        <div class="row justify-content-center">
+            <ul class="d-flex flex-row list-unstyled">
+                <li>
+                    <a class="footer-style-facebook" href="https://www.facebook.com/icc/" target="external"><i class="fa fa-facebook-square fa-2x"></i>&nbsp;</a>
+                </li>
+                <li>
+                    <a class="footer-style-twitter" href="https://twitter.com/ICC" target="external"><i class="fa fa-twitter-square fa-2x"></i>&nbsp;</a>
+                </li>
+                <li>
+                    <a class="footer-style-instagram" href="https://www.instagram.com/icc/" target="external"><i class="fa fa-instagram fa-2x"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- End of footer-->
+    </footer>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js " integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q " crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js " integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl " crossorigin="anonymous"></script>
+    <script async src="https://platform.twitter.com/widgets.js"></script>
+    <!-- Custom JavaScripts-->
+    <script src="scripts/indexInit.js"></script>
+
+</body>
+
+</html>
