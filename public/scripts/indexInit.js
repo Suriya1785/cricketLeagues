@@ -18,6 +18,7 @@ $(function() {
     // Event handler for Services from navbar
     $("#leaguesAnchor").on("click", function() {
         getleagueSection();
+        showLeagues();
     })
 
     // Event handler for Services button from Home page section
@@ -27,14 +28,37 @@ $(function() {
 
     // Event handler for Home from navbar
     $("#homeAnchor").on("click", function() {
+        showHome();
         getHomeSection();
     })
 
     // Event handler for sitelogo from navbar
     $("#logoAnchor").on("click", function() {
+        showHome();
         getHomeSection();
     })
 })
+
+/* function is to show the respective home sections view upon clicking on Home from the navigation bar 
+ * @param: None
+ * Calls: None
+ */
+function showHome() {
+    $("#home").attr("class", "active");
+    $("#leagues").attr("class", "inactive");
+    $("#errorMsgId").empty();
+}
+
+/* function is to show the respective services information sections view upon clicking on Leagues from the navigation bar 
+ * @param:  None
+ * Calls: None
+ */
+function showLeagues() {
+    //Set attribute of home section and leagues section
+    $("#home").attr("class", "inactive");
+    $("#leagues").attr("class", "active");
+    $("#selectLeagueList").addClass("autofocus");
+}
 
 /* function is to get the home section DOM content by dynamically populating them 
  * @param: None
@@ -172,16 +196,10 @@ function loadleagues(leagues) {
                 .on("click", function(e) {
                     // prevent all default action and do as we direct
                     e.preventDefault();
+                    showLeagues();
                     getleagueSection(value.Code);
-                    console.log("onclick worked");
                     // Remove the fixed bottom class, as data is loaded and it needs to be responsive now
-                    $("#footerDiv").addClass("fixed-bottom");
-                    // Identify all previous active items and set their background as "Not selected" and set bg-info for selected one
-                    // $("a").removeClass("bg-info");
-                    // $(this).addClass("bg-info");
-                    // $("#servicesList").empty();
-                    // $("#categoryName").text(value.Category);
-                    // getServices(value.Value);
+                    $("#footerDiv").removeClass("fixed-bottom");
                 })));
     });
     // Get and Show Top teams under Reader Board
@@ -216,6 +234,7 @@ function getQuoteTag() {
 function loadQuotes(quotes) {
     let i = 0;
     let maxQuotes = quotes.length;
+    //Usage of timer for displaying quote by serving it from server
     // setInterval(function() {
     //     $("#quoteTag").attr("class", "blockquote");
     //     $("#quoteTag").html(quotes[i].quotes);
@@ -297,6 +316,7 @@ function getleagueSection(leagueCode) {
             // Store the JSON data in javaScript objects (Pull categories for the offered Ayurvedic services).  
             loadleaguesForLeagueSection(leagues, leagueCode);
         } else {
+            loadleaguesForLeagueSection(leagues, leagueCode);
             console.log("selected particular league code")
         }
     }
@@ -305,7 +325,7 @@ function getleagueSection(leagueCode) {
 /* function is to load leagues under league selection dropdown 
  * @param leagues (javastring object) - contains list of leagues 
  * @param leagueCode (string) - selected league code from home page
- * calls: getTeams() 
+ * calls: getTeams(), getAddTeam()
  */
 function loadleaguesForLeagueSection(leagues, leagueCode) {
     $("#contentDiv").empty();
@@ -320,29 +340,51 @@ function loadleaguesForLeagueSection(leagues, leagueCode) {
         .append($("<div>")
             .attr("class", "row")
             .append($("<label/>")
-                .attr("class", "d-none d-md-inline mr-1")
+                .attr("class", "d-none d-md-inline")
                 .attr("for", "selectLeagueList")
                 .html("League Lists"))
             .append($("<select/>")
                 .attr("id", "selectLeagueList")
-                .attr("class", "d-none d-inline form-control col-md-3")
+                .attr("class", "d-none d-inline form-control col-md-3 ml-2")
                 .on("change", function(e) {
                     // prevent all default action and do as we direct
                     e.preventDefault();
+                    // Clear all prior error messages
+                    $("#errorMsgId").empty();
                     // Remove the fixed bottom class, as data is loaded and it needs to be responsive now
                     $("#footerDiv").removeClass("fixed-bottom");
-                    // Clear the team list before populating the data upon selection 
-                    $("#teamsList").empty();
+                    // clear the team table Div before populating data for respective option
+                    $("#teamTableDiv").empty();
                     getTeams($("#selectLeagueList").val());
+                    // Store in session storage for goback functionality from team details page
+                    let leagueSelection = $("#selectLeagueList").val();
+                    sessionStorage.setItem("leagueSelSession", leagueSelection);
                 })
                 //Add default option and view all option
                 .append($("<option/>")
                     .val("")
                     .html("Select league from dropdown list"))
-                .append($("<option/>")
-                    .val("all")
-                    .html("View All"))
             ))
+        // table to list the teams under selected league dropdown option
+        .append($("<div/>")
+            .append($("<div/>")
+                .attr("id", "teamTableDiv")
+                .attr("class", "col-auto ml-2")))
+        // Add team button in league section
+        .append($("<div/>")
+            .attr("class", "col-md-2")
+            .append($("<button/>")
+                .attr("id", "regTeamBtn")
+                .attr("class", "btn btn-info mt-2")
+                .html("Register Team")
+                .on("click", function(e) {
+                    // prevent all default action and do as we direct
+                    e.preventDefault();
+                    // Clear all prior error messages
+                    $("#errorMsgId").empty();
+                    // Get Add team section template
+                    getRegTeam();
+                })))
     );
 
     //Run through league and populate the dropdown
@@ -352,22 +394,83 @@ function loadleaguesForLeagueSection(leagues, leagueCode) {
             .html(value.Name))
     });
 
+    //Add viewAll option at the end after populating all dropdown
+    $("#selectLeagueList").append($("<option/>")
+        .val("all")
+        .html("View All"));
+
     // Set selection dropdown to the selected league from home section, if chosen
-    if (leagueCode == undefined) {
-
-
+    if (leagueCode != undefined) {
+        $("#selectLeagueList").val(leagueCode);
+        // Remove the footer to display at bottom always, as default selection is chosen from home section 
+        $("#footerDiv").removeClass("fixed-bottom");
+        getTeams(leagueCode);
     } else {
-
+        $("#selectLeagueList").val("");
     }
 }
 
+/* function is to register a team from Leagues section  
+ * @param: leagues (javaString object) - populate the league dropdown
+ * Calls: 
+ * called by: loadleaguesForLeagueSection()
+ */
+function getRegTeam(leagues) {
+    $("#contentDiv").empty();
+
+    $("#contentDiv")
+        .append($("<section/>")
+            .attr("id", "regTeamSection")
+            .append($("<h2/>")
+                .attr("class", "font-italic"))
+            .append($("<form/>")
+                .attr("id", "newTeamForm")
+                .attr("action", "#")
+                .attr("target", "_self")
+                .attr("method", "GET")
+            )
+        )
+    let inputDiv = getInputDiv("teamname", "Team Name", "Enter Team Name", "text");
+    $("#newTeamForm").append(inputDiv);
+    inputDiv = getInputDiv("managername", "Manager Name", "Enter Manager Name", "text");
+    $("#newTeamForm").append(inputDiv);
+    inputDiv = getInputDiv("manageremail", "Manager Email", "Enter Manager Email", "email");
+    $("#newTeamForm").append(inputDiv);
+    inputDiv = getInputDiv("managerphone", "Manager Phone No", "Enter Manager Phone No", "text");
+    $("#newTeamForm").append(inputDiv);
+    // inputDiv = getInputDiv("leaguecode", "League", "Select League from the dropdown list");
+    // $("#newTeamForm").append(inputDiv);
+
+}
+
+function getInputDiv(name, text, placeHolder, inputType) {
+    let inputDiv = $("<div>")
+        .attr("class", "row col-md-8 mt-1 form-inline")
+        .append($("<label/>")
+            .attr("class", "d-none d-md-inline col-md-3")
+            .attr("for", name)
+            .html(text))
+        .append($("<input/>")
+            .attr("class", "d-inline form-control col-md-6")
+            .attr("name", name)
+            .attr("id", name)
+            .attr("placeholder", placeHolder)
+            .attr("required", true)
+            .attr("type", inputType))
+    return inputDiv;
+}
+
+
 /* function is to decide and call the appropriate get Teams option  
  * @param: leagueCode (String) - selected league from the dropdown
- * Calls: loadTeams()
+ * Calls: getAllTeams() & getTeamsPerLeague()
+ * called by: loadleaguesForLeagueSection()
  */
 function getTeams(leagueCode) {
     switch (leagueCode) {
         case "":
+            //set the footer at the end of the page, as there is no data other than dropdown
+            $("#footerDiv").addClass("fixed-bottom");
             errorMsg = "Please choose valid dropdown option from the given list";
             $("#errorMsgId").html(errorMsg);
             $("#errorMsgId").addClass("badInput");
@@ -384,8 +487,8 @@ function getTeams(leagueCode) {
 /* function is to pull the list of all teams from all leagues for view all option
  * @param None 
  * calls: loadTeams()
+ * called by: getTeams()
  */
-
 function getAllTeams() {
     // AJAX call to get all Teams from all leagues
     $.getJSON("/api/teams", function(data) {
@@ -406,6 +509,7 @@ function getAllTeams() {
 /* function is to pull the list of teams for selected league from the dropdown 
  * @param leagueCode (string) - contains selected league 
  * calls: loadTeams()
+ * called by: getTeams()
  */
 function getTeamsPerLeague(leagueCode) {
 
@@ -427,104 +531,338 @@ function getTeamsPerLeague(leagueCode) {
 
 /* function is to create list of team under  details under selected Service  
  * @param teams (javastring object) - contains list of teams received from server through AJAX call  
- * calls: None
+ * calls: getTeamDetails()
+ * called by: getAllTeams(), getTeamsPerLeague() and getTeams()
  */
 function loadTeams(teams) {
-    $("#teamsList").empty();
-    table = $("#teamsList");
-    createTable(table);
+    //Create the team table with table head and table body
+    // table = $("#teamsList");
+    createTable();
+    createTableHead();
+    // Run through the teams under the league to create the table rows under tablebody
     $.each(teams, function(key, value) {
         $("#teamListTbody").append($("<tr/>")
             .append($("<td/>")
                 .html(value.TeamName))
             .append($("<td/>")
-                .html(value.TeamGender))
+                .html(value.ManagerName))
             .append($("<td/>")
-                .html(value.League))
-            .append($("<td/>")
-                .append($("<a/>")
-                    .attr("class", "btn-sm btn-info")
-                    .attr("href", "#")
-                    .text("View Details")
-                    .on("click", function(e) {
-                        e.preventDefault();
-                    })))
+                .html(value.TeamPoints))
+            // create button and wire-in an event to provide more details on the team
             .append($("<td/>")
                 .append($("<a/>")
-                    .attr("class", "btn-sm btn-info")
+                    .attr("class", "btn")
                     .attr("href", "#")
-                    .text("Info")
+                    .append($("<i/>")
+                        .attr("class", "fa fa-info-circle text-info"))
+                    // .text("View Details")
                     .on("click", function(e) {
                         e.preventDefault();
+                        getTeamDetail(value.TeamId);
                     })))
-            .append($("<td/>")
-                .append($("<a/>")
-                    .attr("class", "btn-sm btn-info")
-                    .attr("href", "#")
-                    .text("Delete")
-                    .on("click", function(e) {
-                        e.preventDefault();
-                    })))
+            // .append($("<td/>")
+            //     .append($("<a/>")
+            //         .attr("class", "btn-sm")
+            //         .attr("href", "#")
+            //         // .text("Info")
+            //         .append($("<i/>")
+            //             .attr("class", "fa fa-pencil text-info"))
+            //         .on("click", function(e) {
+            //             e.preventDefault();
+            //         })))
+            // .append($("<td/>")
+            //     .append($("<a/>")
+            //         .attr("class", "btn-sm")
+            //         .attr("href", "#")
+            //         .append($("<i/>")
+            //             .attr("class", "fa fa-trash text-danger"))
+            //         // .text("Delete")
+            //         .on("click", function(e) {
+            //             e.preventDefault();
+            //         })))
         )
     })
 }
 
 /* function is to create a table for table ID - teamslist
- * @param table (Table reference) - Table with list of teams
+ * @param None
  * calls: None
  */
-function createTable(table) {
-    $("#leagueSection").append($("<div/>")
+function createTable() {
+    $("#teamTableDiv").append($("<table>")
+        .attr("class", "table container table-responsive table-striped mt-3 ml-5")
+        .attr("id", "teamList")
+        .append($("<thead/>")
+            .attr("id", "teamListThead"))
+        .append($("<tbody/>")
+            .attr("id", "teamListTbody")))
+}
+
+/* function is to create a tablehead for teamslist table
+ * @param none
+ * calls: None
+ */
+function createTableHead() {
+    $("#teamListThead")
+        .append($("<tr/>")
+            .attr("class", "bg-info font-weight-light text-white")
+            .append($("<th/>")
+                .html("Team Name"))
+            .append($("<th/>")
+                .html("Manager"))
+            .append($("<th/>")
+                .html("Points"))
+            .append($("<th/>")
+                .html("More Info"))
+            // .append($("<th/>")
+            //     .html("Edit"))
+            // .append($("<th/>")
+            //     .html("Delete"))
+        )
+}
+
+/* function is to get Team details from server for selected team 
+ * @param: TeamId (number) - selected TeamId from leagues section
+ * Calls: loadTeamDetails()
+ */
+function getTeamDetail(TeamId) {
+
+    // Pull team details under a teamId
+    $.getJSON(`/api/teams/${TeamId}`, function(data) {
+            team = data;
+        })
+        .done(function() {
+            // upon successful AJAX call perform the below
+            loadTeamDetails(team);
+        })
+        .fail(function() {
+            // upon failure response, send message to user
+            errorMsg = "Failure to get data for team details, please retry"
+            $("#errorMsgId").html(errorMsg);
+            $("#errorMsgId").addClass("badInput");
+        });
+
+}
+
+/* function is to generate DOM for received Team details from server 
+ * @param: team (javastring object) - team details for selected TeamId
+ * Calls: getEditTeam(), getDelTeam()
+ * Called by:getTeamDetail
+ */
+function loadTeamDetails(team) {
+    $("#contentDiv").empty();
+    $("#contentDiv").attr("class", "container justified-content-center")
+        // Team Details Section
+        .append($("<section/>")
+            .attr("id", "teamSection")
+            .append($("<h2/>")
+                .attr("class", "text-center font-italic")
+                .html(team.TeamName))
+            .append($("<div/>")
+                .attr("class", "row")
+                //bootstrap 4 card to display Team Manager information
+                .append($("<div/>")
+                    .attr("id", "managerCard")
+                    .attr("class", "col-md-4")
+                    .append(($("<div/>")
+                        .attr("class", "card box-shadow cardStyle border-info")
+                        .append($("<div/>")
+                            .attr("class", "card-header text-center")
+                            .append($("<h3/>")
+                                .html("Team Manager")))
+                        .append($("<div/>")
+                            .attr("class", "card-body text-center")
+                            .append($("<ul/>")
+                                .attr("class", "list-unstyled mt-3 mb-4")
+                                .append($("<li/>")
+                                    .html(team.ManagerName))
+                                .append($("<li/>")
+                                    .html(team.ManagerEmail))
+                                .append($("<li/>")
+                                    .html(team.ManagerPhone))))))
+                )
+                //Team logo
+                .append($("<div/>")
+                    .attr("class", "col-md-3 text-center")
+                    .append($("<img/>")
+                        .attr("class", "img-responsive")
+                        .attr("src", team.TeamLogo)
+                        .attr("alt", team.TeamId))
+                )
+                //bootstrap 4 card to display Team details
+                .append($("<div/>")
+                    .attr("id", "teamCard")
+                    .attr("class", "col-md-5")
+                    .append(($("<div/>")
+                        .attr("class", "card mb-4 box-shadow cardStyle border-info")
+                        .append($("<div/>")
+                            .attr("class", "card-header text-center")
+                            .append($("<h3/>")
+                                .html("Team Details")))
+                        .append($("<div/>")
+                            .attr("class", "card-body text-center")
+                            .append($("<ul/>")
+                                .attr("class", "list-unstyled")
+                                .append($("<li/>")
+                                    .html(`League : ${team.League}`))
+                                .append($("<li/>")
+                                    .html(`Max Team Members : ${team.MaxTeamMembers}`))
+                                .append($("<li/>")
+                                    .html(`Minimum Age :${team.MinAge}`))
+                                .append($("<li/>")
+                                    .html(`Maximum Age :${team.MaxAge}`))
+                                .append($("<li/>")
+                                    .html(`Team Gender :${team.TeamGender}`))
+                                .append($("<li/>")
+                                    .html(`Team Points :${team.TeamPoints}`))
+                            ))))
+                )
+
+            )
+            // Button to edit team details
+            .append($("<div/>")
+                .attr("class", "row justify-content-center")
+                .append($("<div/>")
+                    .attr("class", "mt-3 col-md-2")
+                    .append($("<button/>")
+                        .attr("class", "btn btn-sm btn-block btn-primary btn-info")
+                        .html("Edit Team")
+                        .on("click", function(e) {
+                            e.preventDefault();
+                            getEditTeam(team.TeamId);
+                        })))
+                // button to delete a team
+                .append($("<div/>")
+                    .attr("class", "mt-3 col-md-2")
+                    .append($("<button/>")
+                        .attr("class", "btn btn-sm btn-block btn-primary btn-danger")
+                        .html("Delete Team")
+                        .on("click", function(e) {
+                            e.preventDefault();
+                            getDelTeam(team.TeamId);
+                        })))
+                // button to go back to league page 
+                .append($("<div/>")
+                    .attr("class", "mt-3 col-md-2")
+                    .append($("<button/>")
+                        .attr("class", "btn btn-sm btn-block btn-primary btn-info")
+                        .html("Go Back")
+                        .on("click", function(e) {
+                            e.preventDefault();
+                            let leagueSelection = sessionStorage.getItem("leagueSelSession");
+                            getleagueSection(leagueSelection);
+                        })))
+            )
+
+        )
+        // Team member div to support responsive design
         .append($("<div/>")
-            .attr("class", "col-auto")
-            .append($("<table>")
-                .attr("class", "table container table-responsive table-striped mt-3 ml-5")
-                .attr("id", "teamList")
-                .append($("<thead/>")
-                    .attr("id", "teamListThead"))
-                .append($("<tbody/>")
-                    .attr("id", "teamListTbody")))))
+            .append($("<h3/>")
+                .html("Members")
+                .attr("class", "mt-3 font-italic text-center"))
+            .append($("<div/>")
+                .attr("id", "teamMemberSection")
+                .attr("class", "d-flex justify-content-center")
+                .append($("<div/>")
+                    .attr("id", "teamMemberDiv"))
+            )
+        );
+
+    // Load Team member section
+    loadTeamMember(team);
 }
 
-/* function is to show the respective home sections view upon clicking on Home from the navigation bar 
- * @param: None"
+/* function is to generate DOM for team member for selected team 
+ * @param: team (javastring object) - team details for selected TeamId
  * Calls: None
  */
-function showHome() {
-    // Show Home section to hold the logo and brief note
-    $("#homeSection").show();
-    $("#headerDiv").show();
-    $("#home").attr("class", "active");
-    // Hide the Services information section
-    $("#featureContainer").hide();
-    $("#services").attr("class", "inactive");
-    // Remove the footer to display at bottom always, as home page has content
-    $("#footerDiv").removeClass("fixed-bottom");
+function loadTeamMember(team) {
+    createTeamMemberTable();
+    createTableMemberHead();
+    // Run through the teams under the league to create the table rows under tablebody
+    $.each(team.Members, function(key, value) {
+        $("#teamMembListTbody").append($("<tr/>")
+            .append($("<td/>")
+                .html(value.MemberName))
+            .append($("<td/>")
+                .html(value.Email))
+            .append($("<td/>")
+                .html(value.Phone))
+            // create button and wire-in an event to provide more details on the team
+            .append($("<td/>")
+                .append($("<a/>")
+                    .attr("class", "btn-sm")
+                    .attr("href", "#")
+                    .append($("<i/>")
+                        .attr("class", "fa fa-info-circle text-info"))
+                    .on("click", function(e) {
+                        e.preventDefault();
+                        getTeamMembDetails(value.MemberId);
+                    })))
+            //override if edit, delete and info on team members tab
+            // .append($("<td/>")
+            //     .append($("<a/>")
+            //         .attr("class", "btn-sm")
+            //         .attr("href", "#")
+            //         .append($("<i/>")
+            //             .attr("class", "fa fa-pencil text-info"))
+            //         .on("click", function(e) {
+            //             e.preventDefault();
+            //             getTeamMembEdit(value.MemberId);
+            //         })))
+            // .append($("<td/>")
+            //     .append($("<a/>")
+            //         .attr("class", "btn-sm")
+            //         .attr("href", "#")
+            //         .append($("<i/>")
+            //             .attr("class", "fa fa-trash text-danger"))
+            //         // .text("Delete")
+            //         .on("click", function(e) {
+            //             e.preventDefault();
+            //             getTeamMembDelete(value.MemberId);
+            //         })))
+        )
+    })
 }
 
-/* function is to show the respective services information sections view upon clicking on Services from the navigation bar 
- * @param:  None
- * Calls: None
+/* function is to create a table for Team Member
+ * @param None
+ * calls: None
  */
-function showServices() {
-    // Hide Home section to hold the logo, brief note and enable the view categories button
-    $("#homeSection").hide();
-    $("#home").attr("class", "inactive");
-    $("#headerDiv").hide();
-
-    // Show the view categories section
-    $("#services").attr("class", "active");
-    $("#categoryContainer").show();
-    $("#featureContainer").show();
-    $("a").removeClass("bg-info");
-
-    //Add fixed-bottom to show the footer at the bottom during service section launch
-    $("#footerDiv").addClass("fixed-bottom");
-
-    // Hide Services information and service card details
-    $("#servicesDiv").hide();
-    $("#serviceCard").hide();
+function createTeamMemberTable() {
+    $("#teamMemberDiv").append($("<table>")
+        .attr("class", "table container table-responsive table-striped mt-3 ml-3 mr-3")
+        .attr("id", "teamList")
+        .append($("<thead/>")
+            .attr("id", "teamMembListThead"))
+        .append($("<tbody/>")
+            .attr("id", "teamMembListTbody")))
 }
+
+/* function is to create a tableHead for Team Member
+ * @param None
+ * calls: None
+ */
+function createTableMemberHead() {
+    $("#teamMembListThead")
+        .append($("<tr/>")
+            .attr("class", "bg-info font-weight-light text-white")
+            .append($("<th/>")
+                .html("Member Name"))
+            .append($("<th/>")
+                .html("Email"))
+            .append($("<th/>")
+                .html("Phone"))
+            .append($("<th/>")
+                //override if design is supported to have all edit , delete and info on team details page
+                // .attr("colspan", "3")
+                .attr("class", "text-center")
+                .html("Actions"))
+        )
+}
+
+
+///////////////////////////////////////////////////
 
 
 /* function is to list of services under selected category
