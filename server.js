@@ -278,6 +278,9 @@ app.post("/api/teams", urlencodedParser, function(req, res) {
     console.log("Received a POST request to add a team");
     console.log("BODY -------->" + JSON.stringify(req.body));
 
+    //Initialize the team points
+    let teamPoints = 0;
+
     // assemble team information so we can validate it
     let team = {
         TeamId: getNextId("team"), // assign id to team
@@ -290,6 +293,7 @@ app.post("/api/teams", urlencodedParser, function(req, res) {
         MinMemberAge: Number(req.body.minmemberage),
         MaxMemberAge: Number(req.body.maxmemberage),
         TeamGender: req.body.teamgender,
+        TeamPoints: Number(teamPoints),
         Members: []
     };
 
