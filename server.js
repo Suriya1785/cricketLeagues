@@ -1,3 +1,14 @@
+var multer = require('multer');
+var storage = multer.diskStorage({
+    destination: function(req, teamimage, cb) {
+        cb(null, 'public/images/teams')
+    },
+    filename: function(req, teamimage, cb) {
+        cb(null, `${getNextId("team", true)}_${teamimage.originalname}`)
+    }
+});
+
+var upload = multer({ storage: storage });
 let express = require("express");
 let bodyParser = require("body-parser");
 let fs = require("fs");
@@ -25,7 +36,7 @@ function logArrayOfTeams(arr) {
 
 // ------ Get next ID helper ------------------
 
-function getNextId(counterType) // use 'member' or 'team' as counterType
+function getNextId(counterType, readOnly) // use 'member' or 'team' as counterType
 {
     // read the counter file
     let data = fs.readFileSync(__dirname + "/data/counters.json", "utf8");
@@ -46,7 +57,9 @@ function getNextId(counterType) // use 'member' or 'team' as counterType
     }
 
     // save the updated counter
-    fs.writeFileSync(__dirname + "/data/counters.json", JSON.stringify(data));
+    if (!readOnly) {
+        fs.writeFileSync(__dirname + "/data/counters.json", JSON.stringify(data));
+    }
 
     return id;
 }
@@ -169,6 +182,21 @@ app.get("/index.html", function(req, res) {
 // ------------------------------------------------------------------------------
 // THIS CODE ALLOWS REQUESTS FOR THE API THROUGH 
 
+// GET QUOTE TAGS
+app.get("/api/quotes", function(req, res) {
+    console.log("Received a GET request for quotes");
+
+    let data = fs.readFileSync(__dirname + "/data/quotes.json", "utf8");
+    data = JSON.parse(data);
+
+    // console.log("Returned leagues are: ");
+    // for(let i = 0; i < data.length; i++) {
+    //   console.log("League: " + data[i].Name);
+    // }
+    res.end(JSON.stringify(data));
+});
+
+
 // GET LEAGUES
 app.get("/api/leagues", function(req, res) {
     console.log("Received a GET request for leagues");
@@ -258,46 +286,130 @@ app.get("/api/teams/:teamid/members/:memberid", function(req, res) {
     res.end(JSON.stringify(match));
 })
 
-// ADD A TEAM
-app.post("/api/teams", urlencodedParser, function(req, res) {
+
+// ADD A TEAM WITH IMAGE
+app.post("/api/teams", upload.single('teamimage'), function(req, res) {
     console.log("Received a POST request to add a team");
     console.log("BODY -------->" + JSON.stringify(req.body));
 
-    // assemble team information so we can validate it
-    let team = {
-        TeamId: getNextId("team"), // assign id to team
-        TeamName: req.body.teamname,
-        League: req.body.leaguecode,
-        ManagerName: req.body.managername,
-        ManagerPhone: req.body.managerphone,
-        ManagerEmail: req.body.manageremail,
-        MaxTeamMembers: Number(req.body.maxteammembers),
-        MinMemberAge: Number(req.body.minmemberage),
-        MaxMemberAge: Number(req.body.maxmemberage),
-        TeamGender: req.body.teamgender,
-        Members: []
-    };
+    try {
+        if (req.file.filename) {
+            // Save image in /public/uploads folder
+            var image = `/images/teams/${getNextId("team", true)}_${req.file.originalname}`;
+            console.log(`Image saved as: ${image}`);
 
-    //console.log("Performing team validation...")
-    if (!isValidTeam(team)) {
-        //console.log("Invalid  data!")
-        res.status(400).send("Bad Request - Incorrect or Missing Data");
-        return;
+            //Initialize the team points
+            let teamPoints = 0;
+
+            // assemble team information so we can validate it
+            let team = {
+                TeamId: getNextId("team"), // assign id to team
+                TeamName: req.body.teamname,
+                League: req.body.leaguecode,
+                ManagerName: req.body.managername,
+                ManagerPhone: req.body.managerphone,
+                ManagerEmail: req.body.manageremail,
+                MaxTeamMembers: Number(req.body.maxteammembers),
+                MinMemberAge: Number(req.body.minmemberage),
+                MaxMemberAge: Number(req.body.maxmemberage),
+                TeamGender: req.body.teamgender,
+                TeamPoints: Number(teamPoints),
+                //Added for teamlogo changes
+                TeamLogo: image,
+                Members: []
+            };
+
+            //console.log("Performing team validation...")
+            if (!isValidTeam(team)) {
+                //console.log("Invalid  data!")
+                res.status(400).send("Bad Request - Incorrect or Missing Data");
+                return;
+            }
+            //console.log("Valid data!")
+
+            let data = fs.readFileSync(__dirname + "/data/teams.json", "utf8");
+            data = JSON.parse(data);
+
+            // add the team
+            data[data.length] = team;
+
+            fs.writeFileSync(__dirname + "/data/teams.json", JSON.stringify(data));
+
+            //console.log("New team added: ");
+            //logOneTeam(team);
+            res.status(200).send();
+        }
+
+    } catch (e) {
+        console.log(e);
     }
-    //console.log("Valid data!")
-
-    let data = fs.readFileSync(__dirname + "/data/teams.json", "utf8");
-    data = JSON.parse(data);
-
-    // add the team
-    data[data.length] = team;
-
-    fs.writeFileSync(__dirname + "/data/teams.json", JSON.stringify(data));
-
-    //console.log("New team added: ");
-    //logOneTeam(team);
-    res.status(200).send();
 })
+
+
+// // ADD A TEAM
+// app.post("/api/teams", urlencodedParser, function(req, res) {
+//     console.log("Received a POST request to add a team");
+//     console.log("BODY -------->" + JSON.stringify(req.body));
+
+//     //Initialize the team points
+//     let teamPoints = 0;
+
+//     // assemble team information so we can validate it
+//     let team = {
+//         TeamId: getNextId("team"), // assign id to team
+//         TeamName: req.body.teamname,
+//         League: req.body.leaguecode,
+//         ManagerName: req.body.managername,
+//         ManagerPhone: req.body.managerphone,
+//         ManagerEmail: req.body.manageremail,
+//         MaxTeamMembers: Number(req.body.maxteammembers),
+//         MinMemberAge: Number(req.body.minmemberage),
+//         MaxMemberAge: Number(req.body.maxmemberage),
+//         TeamGender: req.body.teamgender,
+//         TeamPoints: Number(teamPoints),
+//         //Added for teamlogo changes
+//         TeamLogo: req.body.teamimage,
+//         Members: []
+//     };
+
+//     //console.log("Performing team validation...")
+//     if (!isValidTeam(team)) {
+//         //console.log("Invalid  data!")
+//         res.status(400).send("Bad Request - Incorrect or Missing Data");
+//         return;
+//     }
+//     //console.log("Valid data!")
+
+//     let data = fs.readFileSync(__dirname + "/data/teams.json", "utf8");
+//     data = JSON.parse(data);
+
+//     //Image upload start upon successful validation of team data
+
+//     // var form = new formidable.IncomingForm();
+
+//     // form.parse(req);
+
+//     // console.log(form);
+
+//     // form.on('fileBegin', function(name, file) {
+//     //     file.path = __dirname + '/images/teams/' + file.name;
+//     //     team.TeamLogo = 'images/teams/' + file.name
+//     // });
+
+//     // form.on('file', function(name, file) {
+//     //     console.log('Uploaded ' + file.name + '!');
+//     // });
+//     //Image upload end
+
+//     // add the team
+//     data[data.length] = team;
+
+//     fs.writeFileSync(__dirname + "/data/teams.json", JSON.stringify(data));
+
+//     //console.log("New team added: ");
+//     //logOneTeam(team);
+//     res.status(200).send();
+// })
 
 // EDIT A TEAM
 app.put("/api/teams", urlencodedParser, function(req, res) {
@@ -545,7 +657,7 @@ app.delete("/api/teams/:teamid/members/:memberid", urlencodedParser, function(re
     console.log("Found team!");
 
     // find existing member on the team
-    let foundAt = team.Members.findIndex(m => m.MemberId == req.body.memberid);
+    let foundAt = team.Members.findIndex(m => m.MemberId == memberId);
 
     let match = null;
     // delete the member if found
