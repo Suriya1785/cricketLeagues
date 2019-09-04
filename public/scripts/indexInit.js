@@ -3,9 +3,9 @@
  * Date: 08/28/2019
  */
 "Use Strict";
-/* window onload/ready function to load page with categories and assign event for other service functions. 
+/* window onload/ready function to load page with leagues, top team in each leagues and assign event for anchor functions. 
  * @param: None 
- * Calls: loadCategories(), showHome() and showServices() 
+ * Calls: showHome(), showLeagues(), getHomeSection() and getleagueSection() 
  */
 $(function() {
 
@@ -17,12 +17,6 @@ $(function() {
 
     // Event handler for leagues from navbar
     $("#leaguesAnchor").on("click", function() {
-        getleagueSection();
-        showLeagues();
-    })
-
-    // Event handler for leagues button from Home page section
-    $("#leaguesBtn").on("click", function() {
         getleagueSection();
         showLeagues();
     })
@@ -51,7 +45,7 @@ function showHome() {
     $("#errorMsgId").empty();
 }
 
-/* function is to show the respective services information sections view upon clicking on Leagues from the navigation bar 
+/* function is to show the respective leagues information sections view upon clicking on Leagues from the navigation bar 
  * @param:  None
  * Calls: None
  * Called by Window onload
@@ -88,6 +82,7 @@ function getHomeSection() {
                     .attr("class", "text-align-center fonthandler"))
                 .append($("<table/>")
                     .attr("class", "table container table-responsive table-striped")
+                    .attr("id", "rankingTable")
                     .append($("<thead/>")
                         .append($("<tr/>")
                             .attr("class", "bg-info font-weight-light text-white")
@@ -101,7 +96,7 @@ function getHomeSection() {
             )
             //League List Div
             .append($("<div/>")
-                .attr("class", "col-md-6")
+                .attr("class", "col-md-5")
                 .attr("id", "leagueListDiv")
                 .append($("<h3/>")
                     .attr("class", "font-weight-bold font-italic")
@@ -112,7 +107,7 @@ function getHomeSection() {
             )
             // Quotes and video Div
             .append($("<div/>")
-                .attr("class", "col-md-3")
+                .attr("class", "col-md-4")
                 // Video Div
                 .append($("<div/>")
                     .attr("class", "row")
@@ -121,7 +116,7 @@ function getHomeSection() {
                         .text("Cricket Quick Intro"))
                     // Embed iframe for cricket intro video and set allow full screen
                     .append($("<iframe/>")
-                        .attr("class", "imageWidth")
+                        .attr("class", "videoWidth")
                         .attr("src", "https://www.youtube.com/embed/Kwu1yIC-ssg")
                         .attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
                         .attr("allowfullscreen", "allowfullscreen")))
@@ -130,12 +125,12 @@ function getHomeSection() {
                     .attr("class", "row")
                     .attr("id", "quotesDiv")
                     .append($("<h3/>")
-                        .html("Quotes by Great Cricketers"))
+                        .html("Quotes by Great Cricketers")
+                        .attr("class", "font-italic"))
                     .append($("<blockquote/>")
                         .attr("class", "font-italic")
                         .append($("<p/>")
                             .attr("id", "quoteTag")
-                            // .attr("class", "blockquote")
                         )
                         .append($("<footer>")
                             .attr("class", "text-info")
@@ -157,14 +152,14 @@ function getHomeSection() {
  * Called by: getHomeSection()
  */
 function getLeagues() {
-    // Store the JSON data in javaScript objects (Pull categories for the offered Ayurvedic services).  
+    // Store the JSON data in javaScript objects (Pull leagues from server).  
     $.getJSON("/api/leagues/", function(data) {
             leagues = data;
         })
         .done(function() {
             // upon successful AJAX call perform the below
-            // Store leagues in local storage to access for generating league section
-            localStorage.setItem("leaguesLocal", JSON.stringify(leagues));
+            // Store leagues in Session storage to access for generating league section
+            sessionStorage.setItem("leaguesLocal", JSON.stringify(leagues));
             loadleagues(leagues);
         })
         .fail(function() {
@@ -182,32 +177,43 @@ function getLeagues() {
  */
 function loadleagues(leagues) {
     //Run through each leagues entry and populate 
-    $.each(leagues, function(key, value) {
+
+    if (leagues.length != 0) {
+        $.each(leagues, function(key, value) {
+            $("#leagueListUl").append($("<li/>")
+                .attr("class", "list-inline-item")
+                .append($("<a/>")
+                    .attr("href", "#")
+                    .attr("class", "non-underline-link")
+                    // Image tag to show the league logo
+                    .append($("<img/>")
+                        .attr("src", value.Img)
+                        .attr("alt", value.Code)
+                        .attr("class", "hideimage"))
+                    .append($("<br/>"))
+                    .append($("<span/>")
+                        .attr("class", "text-secondary text-center")
+                        .text(value.Name))
+                    .on("click", function(e) {
+                        // prevent all default action and do as we direct
+                        e.preventDefault();
+                        showLeagues();
+                        getleagueSection(value.Code);
+                        // Remove the fixed bottom class, as data is loaded and it needs to be responsive now
+                        $("#footerDiv").removeClass("fixed-bottom");
+                    })));
+        });
+        // Get and Show Top teams under Reader Board
+        getRankings(leagues);
+    } else {
+        // Present informational message to user if no leagues currently ongoing
         $("#leagueListUl").append($("<li/>")
-            .attr("class", "list-inline-item")
-            .append($("<a/>")
-                .attr("href", "#")
-                .attr("class", "non-underline-link")
-                // Image tag to show the league logo
-                .append($("<img/>")
-                    .attr("src", value.Img)
-                    .attr("alt", value.Code)
-                    .attr("class", "hideimage"))
-                .append($("<br/>"))
-                .append($("<span/>")
-                    .attr("class", "text-secondary text-center")
-                    .text(value.Name))
-                .on("click", function(e) {
-                    // prevent all default action and do as we direct
-                    e.preventDefault();
-                    showLeagues();
-                    getleagueSection(value.Code);
-                    // Remove the fixed bottom class, as data is loaded and it needs to be responsive now
-                    $("#footerDiv").removeClass("fixed-bottom");
-                })));
-    });
-    // Get and Show Top teams under Reader Board
-    getRankings(leagues);
+            .attr("class", "list-inline-item text-danger")
+            // .addClass("red")
+            .html("OOPS!!! No Ongoing Leagues & will be shortly in ACTION"))
+        $("#rankingTable").empty();
+        $("#readerBoard p").html("Cricket is a bat-and-ball game played between two teams of eleven players on a field at the centre of which is a 20-metre (22-yard) pitch with a wicket at each end, each comprising two bails balanced on three stumps. The batting side scores runs by striking the ball bowled at the wicket with the bat, while the bowling and fielding side tries to prevent this and dismiss each player (so they are 'out').");
+    }
 }
 
 /* function is to get quote tag from server and populate the value dynamically  
@@ -222,7 +228,6 @@ function getQuoteTag() {
         .done(function() {
             // upon successful AJAX call perform the below
             loadQuotes(quotes);
-            // $("#categoryContainer").hide();
         })
         .fail(function() {
             // upon failure response, send message to user
@@ -241,16 +246,16 @@ function loadQuotes(quotes) {
     let i = 0;
     let maxQuotes = quotes.length;
     //Usage of timer for displaying quote by serving it from server
-    // setInterval(function() {
-    //     $("#quoteTag").attr("class", "blockquote");
-    //     $("#quoteTag").html(quotes[i].quotes);
-    //     $("#quoteAuthor").html(quotes[i].author);
-    //     i++;
-    //     //Reset it to beginning of quotes, if it reaches max
-    //     if (i == maxQuotes) {
-    //         i = 0;
-    //     }
-    // }, 10000);
+    setInterval(function() {
+        $("#quoteTag").attr("class", "blockquote");
+        $("#quoteTag").html(quotes[i].quotes);
+        $("#quoteAuthor").html(quotes[i].author);
+        i++;
+        //Reset it to beginning of quotes, if it reaches max
+        if (i == maxQuotes) {
+            i = 0;
+        }
+    }, 3000);
 }
 
 /* function is to get Team Rankings from teams data to display readerboard 
@@ -305,7 +310,7 @@ function loadRankingItem(team) {
  * getDelTeam(), window onload, loadleagues()
  */
 function getleagueSection(leagueCode) {
-    let leaguesLocalStorage = JSON.parse(localStorage.getItem("leaguesLocal"));
+    let leaguesLocalStorage = JSON.parse(sessionStorage.getItem("leaguesLocal"));
 
     if (leaguesLocalStorage == "") {
         errorMsg = "Failure to get leagues list from local storage, please refresh the page"
@@ -313,7 +318,7 @@ function getleagueSection(leagueCode) {
         $("#errorMsgId").addClass("badInput");
     } else {
         if (leagueCode == undefined) {
-            // Store the JSON data in javaScript objects (Pull categories for the offered Ayurvedic services).  
+            // Store the JSON data in javaScript objects (Pull leagues).  
             loadleaguesForLeagueSection(leagues, leagueCode);
         } else {
             // Selected particular league
@@ -385,7 +390,7 @@ function loadleaguesForLeagueSection(leagues, leagueCode) {
                     // Clear all prior error messages
                     $("#errorMsgId").empty();
                     // Usage of cache for retrieving JSON object (requires stringify and parse, as cache can have only string)
-                    let leaguesLocalStorage = JSON.parse(localStorage.getItem("leaguesLocal"));
+                    let leaguesLocalStorage = JSON.parse(sessionStorage.getItem("leaguesLocal"));
                     // Get Add team section template
                     getRegTeam(leaguesLocalStorage);
                 })))
@@ -481,26 +486,26 @@ function getRegTeam(leaguesLocalStorage) {
     inputDiv = getInputDiv("maxmemberage", "Maximum Member Age", "Enter Maximum Member Age", "number");
     $("#newTeamForm").append(inputDiv);
 
-    //Image file inputDiv (In-progress)
-    // $("#newTeamForm").append($("<div/>")
-    //     .attr("class", "input-group row offset-md-3 col-md-6 mt-1 form-inline")
-    //     .append($("<div/>")
-    //         .attr("class", "input-group-prepend")
-    //         .append($("<span/>")
-    //             .attr("class", "input-group-text")
-    //             .attr("id", "inputGroupFileAddon01")))
-    //     .append($("<div/>")
-    //         .attr("class", "custom-file")
-    //         .append($("<input/>")
-    //             .attr("type", "file")
-    //             .attr("class", "custom-file-input")
-    //             .attr("name", "teamimage")
-    //             .attr("id", "teamimage")
-    //             .attr("aria-describedby", "inputGroupFileAddon01"))
-    //         .append($("<label/>")
-    //             .attr("class", "custom-file-label")
-    //             .attr("for", "inputGroupFile01")
-    //             .attr("text", "Choose file"))))
+    //Image file input definition
+    $("#newTeamForm").append($("<div/>")
+        .attr("class", "input-group row offset-md-3 col-md-6 mt-1 form-inline")
+        .append($("<div/>")
+            .attr("class", "input-group-prepend")
+            .append($("<span/>")
+                .attr("class", "input-group-text")
+                .attr("id", "inputGroupFileAddon01")))
+        .append($("<div/>")
+            .attr("class", "custom-file")
+            .append($("<input/>")
+                .attr("type", "file")
+                .attr("class", "custom-file-input")
+                .attr("name", "teamimage")
+                .attr("id", "teamimage")
+                .attr("aria-describedby", "inputGroupFileAddon01"))
+            .append($("<label/>")
+                .attr("class", "custom-file-label")
+                .attr("for", "inputGroupFile01")
+                .attr("text", "Choose file"))))
 
     // Gender selection radio box
     $("#newTeamForm").append($("<div>")
@@ -545,19 +550,22 @@ function getRegTeam(leaguesLocalStorage) {
                 .attr("for", "any")
                 .html("Any"))))
 
-    // Submit the form to server & update the teams data
+    // Submit the form to server & add team with image 
+    $("#newTeamForm").on("submit", function(e) {
+        e.preventDefault();
+        submitRegForm($("#leaguecode").val(), this);
+    })
+
+    // Button to perform actions on new register team form
     $("#newTeamForm").append($("<div/>")
         .attr("class", "row offset-md-4 col-md-8")
         .append($("<div/>")
             .attr("class", "mt-3 col-md-2")
             .append($("<button/>")
                 .attr("class", "btn btn-sm btn-block btn-primary btn-info")
-                .attr("type", "button")
+                .attr("type", "submit")
                 .html("Submit")
-                .on("click", function(e) {
-                    e.preventDefault();
-                    submitRegForm($("#leaguecode").val());
-                })))
+            ))
         // button to reset the registration form
         .append($("<div/>")
             .attr("class", "mt-3 col-md-2")
@@ -603,7 +611,6 @@ function getInputDiv(name, text, placeHolder, inputType) {
             .attr("type", inputType))
     return inputDiv;
 }
-
 
 /* function is to hide and show the gender option based on the league selection 
  * @param: leagueCode (string) - selected league from registering a team section
@@ -659,32 +666,42 @@ function setGender(leagueCode, leaguesLocalStorage) {
  * @param: None
  * Calls: getleagueSection()
  */
-function submitRegForm(leagueCode) {
+function submitRegForm(leagueCode, theForm) {
     // following did not follow camelCase, as name attribute expected 
     let errorMsg;
+    var formData = new FormData(theForm);
     // validate user input before posting to server
     let isDataValid = validateForm();
+
+    // Post team with image upload
     if (isDataValid) {
-        // AJAX call to send the form data to server upon serialization 
-        $.post("/api/teams", $("#newTeamForm").serialize(),
-                function(data) {
-                    // upon successful addition of team, take back to added league and show the added team along with others in the league
-                    errorMsg = "Team has been successfully added";
-                    $("#errorMsgId").html(errorMsg);
-                    // If team is added from select dropdown list option, then route back to viewall option to view added team
-                    if (leagueCode == "") {
-                        leagueCode = "all";
-                    }
-                    getleagueSection(leagueCode);
-                })
-            .fail(function() {
-                errorMsg = "Failure to get server data, please retry"
+        $.ajax({
+                type: 'POST',
+                url: `/api/teams/`,
+                data: formData,
+                processData: false,
+                contentType: false
+            })
+            .done(function() {
+                // upon successful addition of team, take back to added league and show the added team along with others in the league
+                errorMsg = "Team has been successfully added";
+                $("#errorMsgId").html(errorMsg);
+                $("#errorMsgId").removeClass("badInput");
+                // If team is added from select dropdown list option, then route back to viewall option to view added team
+                if (leagueCode == "") {
+                    leagueCode = "all";
+                }
+                getleagueSection(leagueCode);
+            })
+            .fail(function(e) {
+                errorMsg = "Failure to register a team, please retry"
                 $("#errorMsgId").html(errorMsg);
                 $("#errorMsgId").addClass("badInput");
+                //Added to find out error messages during image upload and add team issues
+                console.log(e);
             });
         return false;
     }
-
 }
 
 /* function is to build javascript object and call common validate function
@@ -692,7 +709,7 @@ function submitRegForm(leagueCode) {
  * @param: None
  * Calls: validate()
  */
-function validateForm() {
+function validateForm(team) {
     let temp = "";
     let inputData = {
         teamname: "",
@@ -715,7 +732,7 @@ function validateForm() {
     inputData.maxmemberage = $("#maxmemberage").val();
     inputData.teamgender = $("input[name=teamgender]:checked").val();
     // Send input form data and create javascript object
-    let resp = validate(inputData);
+    let resp = validate(inputData, team);
 
     if (resp.status == true) {
         // Run through error message array and build message and update the ta
@@ -798,7 +815,7 @@ function getTeamsPerLeague(leagueCode) {
         });
 }
 
-/* function is to create list of team under  details under selected Service  
+/* function is to create list of team under  details under selected league  
  * @param teams (javastring object) - contains list of teams received from server through AJAX call  
  * calls: getTeamDetails()
  * called by: getAllTeams(), getTeamsPerLeague() and getTeams()
@@ -824,7 +841,6 @@ function loadTeams(teams) {
                     .attr("href", "#")
                     .append($("<i/>")
                         .attr("class", "fa fa-info-circle text-info"))
-                    // .text("View Details")
                     .on("click", function(e) {
                         e.preventDefault();
                         // Store in session storage for goback functionality from team details page
@@ -834,26 +850,6 @@ function loadTeams(teams) {
                         $("#errorMsgId").empty();
                         getTeamDetail(value.TeamId);
                     })))
-            // .append($("<td/>")
-            //     .append($("<a/>")
-            //         .attr("class", "btn-sm")
-            //         .attr("href", "#")
-            //         // .text("Info")
-            //         .append($("<i/>")
-            //             .attr("class", "fa fa-pencil text-info"))
-            //         .on("click", function(e) {
-            //             e.preventDefault();
-            //         })))
-            // .append($("<td/>")
-            //     .append($("<a/>")
-            //         .attr("class", "btn-sm")
-            //         .attr("href", "#")
-            //         .append($("<i/>")
-            //             .attr("class", "fa fa-trash text-danger"))
-            //         // .text("Delete")
-            //         .on("click", function(e) {
-            //             e.preventDefault();
-            //         })))
         )
     })
 }
@@ -887,13 +883,7 @@ function createTableHead() {
             .append($("<th/>")
                 .html("Points"))
             .append($("<th/>")
-                .html("More Info"))
-            // Show edit and delete action on team upon showing team details
-            // .append($("<th/>")
-            //     .html("Edit"))
-            // .append($("<th/>")
-            //     .html("Delete"))
-        )
+                .html("Action")))
 }
 
 /* function is to get Team details from server for selected team 
@@ -961,7 +951,8 @@ function loadTeamDetails(team) {
                 .append($("<div/>")
                     .attr("class", "col-md-3 text-center")
                     .append($("<img/>")
-                        .attr("class", "img-responsive")
+                        .attr("class", "img-responsive, imageWidth")
+                        .addClass("hideimage")
                         .attr("src", team.TeamLogo)
                         .attr("alt", team.TeamId))
                 )
@@ -1071,55 +1062,40 @@ function loadTeamDetails(team) {
  * Calls: None
  */
 function loadTeamMember(team) {
-    createTeamMemberTable();
-    createTableMemberHead();
-    // Run through the teams under the league to create the table rows under tablebody
-    $.each(team.Members, function(key, value) {
-        $("#teamMembListTbody").append($("<tr/>")
-            .append($("<td/>")
-                .html(value.MemberName))
-            .append($("<td/>")
-                .html(value.Email))
-            .append($("<td/>")
-                .html(value.Phone))
-            // create button and wire-in an event to provide more details on the team
-            .append($("<td/>")
-                .append($("<a/>")
-                    .attr("class", "btn-sm")
-                    .attr("href", "#")
-                    .append($("<i/>")
-                        .attr("class", "fa fa-info-circle text-info"))
-                    .on("click", function(e) {
-                        e.preventDefault();
-                        //clear prior informtional message
-                        $("#errorMsgId").empty();
-                        getTeamMembDetails(value.MemberId, team);
-                    })))
-            // Give the option of delete and edit upon showing the member info page
-            //override if edit, delete and info on team members tab
-            // .append($("<td/>")
-            //     .append($("<a/>")
-            //         .attr("class", "btn-sm")
-            //         .attr("href", "#")
-            //         .append($("<i/>")
-            //             .attr("class", "fa fa-pencil text-info"))
-            //         .on("click", function(e) {
-            //             e.preventDefault();
-            //             getTeamMembEdit(value.MemberId);
-            //         })))
-            // .append($("<td/>")
-            //     .append($("<a/>")
-            //         .attr("class", "btn-sm")
-            //         .attr("href", "#")
-            //         .append($("<i/>")
-            //             .attr("class", "fa fa-trash text-danger"))
-            //         // .text("Delete")
-            //         .on("click", function(e) {
-            //             e.preventDefault();
-            //             getTeamMembDelete(value.MemberId);
-            //         })))
-        )
-    })
+
+    //Create the table to show the list of members if members are enrolled  
+    if (team.Members.length > 0) {
+        createTeamMemberTable();
+        createTableMemberHead();
+        // Run through the teams under the league to create the table rows under tablebody
+        $.each(team.Members, function(key, value) {
+            $("#teamMembListTbody").append($("<tr/>")
+                .append($("<td/>")
+                    .html(value.MemberName))
+                .append($("<td/>")
+                    .html(value.Email))
+                .append($("<td/>")
+                    .html(value.Phone))
+                // create button and wire-in an event to provide more details on the team
+                .append($("<td/>")
+                    .append($("<a/>")
+                        .attr("class", "btn-sm")
+                        .attr("href", "#")
+                        .append($("<i/>")
+                            .attr("class", "fa fa-info-circle text-info"))
+                        .on("click", function(e) {
+                            e.preventDefault();
+                            //clear prior informtional message
+                            $("#errorMsgId").empty();
+                            getTeamMembDetails(value.MemberId, team);
+                        }))))
+        })
+    } else {
+        //Print informational message for team with no members enrolled yet
+        $("#teamMemberDiv").append($("<p/>")
+            .html("No members enrolled yet!!")
+            .attr("class", "text-success"));
+    }
 }
 
 /* function is to create a table for Team Member
@@ -1187,9 +1163,9 @@ function getEditTeam(TeamId) {
  * Called By: getEditTeam()
  */
 function loadEditTeamDetails(team) {
-    //Get league details from local storage to use it to populate dropdown
+    //Get league details from session storage to use it to populate dropdown
     //Usage of cache for retrieving JSON object (requires stringify and parse, as cache can have only string)
-    let leaguesLocalStorage = JSON.parse(localStorage.getItem("leaguesLocal"));
+    let leaguesLocalStorage = JSON.parse(sessionStorage.getItem("leaguesLocal"));
 
     //clear the content div before creating team template
     $("#contentDiv").empty();
@@ -1211,28 +1187,8 @@ function loadEditTeamDetails(team) {
     $("#editTeamForm").append(inputDiv);
     inputDiv = getInputDiv("teamname", "Team Name", "Enter Team Name", "text");
     $("#editTeamForm").append(inputDiv);
-    $("#editTeamForm").append($("<div/>")
-        .attr("class", "row offset-md-3 col-md-8 mt-1 form-inline")
-        .append($("<label/>")
-            .attr("class", "d-none d-md-inline col-md-3")
-            .attr("for", "leaguecode")
-            .html("League"))
-        .append($("<select/>")
-            .attr("id", "leaguecode")
-            .attr("name", "leaguecode")
-            .attr("class", "d-inline form-control col-md-6")
-            //Add default option and view all option
-            .append($("<option/>")
-                .val("")
-                .html("Select league from dropdown list"))
-        ));
-    //Run through league objects from local storage and populate the dropdown for registering team
-    $.each(leaguesLocalStorage, function(key, value) {
-        $("#leaguecode").append($("<option/>")
-            .val(value.Code)
-            .html(value.Name))
-    });
-
+    inputDiv = getInputDiv("leaguecode", "League", "", "text");
+    $("#editTeamForm").append(inputDiv);
     //Generate all inputDiv dynamically for editing a team
     inputDiv = getInputDiv("managername", "Manager Name", "Enter Manager Name", "text");
     $("#editTeamForm").append(inputDiv);
@@ -1301,7 +1257,7 @@ function loadEditTeamDetails(team) {
                         e.preventDefault();
                         // clear any informational message
                         $("#errorMsgId").empty();
-                        submitEditForm(team.TeamId);
+                        submitEditForm(team.TeamId, team);
                     })))
             // button to reset the registration form
             .append($("<div/>")
@@ -1367,10 +1323,10 @@ function loadTeamItem(team, leaguesLocalStorage) {
  * calls: getTeamDetail()
  * Called By: loadEditTeamDetails()
  */
-function submitEditForm(TeamId) {
+function submitEditForm(TeamId, team) {
     let errorMsg;
     // validate user input before posting to server
-    let isDataValid = validateForm();
+    let isDataValid = validateForm(team);
     if (isDataValid) {
         $.ajax({
             url: '/api/teams',
@@ -1381,8 +1337,8 @@ function submitEditForm(TeamId) {
             getTeamDetail(team.TeamId);
         }).fail(function() {
             errorMsg = "Failure to get server data during team edit submission, please retry"
-            $("errorMsgId").html(errorMsg);
-            $("errorMsgId").addClass("badInput");
+            $("#errorMsgId").html(errorMsg);
+            $("#errorMsgId").addClass("badInput");
         })
     }
 }
@@ -1434,7 +1390,7 @@ function getDelTeam(TeamId) {
             .html("Cancel"))
         //confirm button to submit the delete team to server
         .append($("<button/>")
-            .attr("class", "btn btn-primary")
+            .attr("class", "btn btn-primary btn-danger")
             .attr("data-dismiss", "modal")
             .html("Confirm")
             .on("click", function(e) {
@@ -1502,9 +1458,9 @@ function subDelTeam(TeamId) {
         $("#errorMsgId").empty();
         $("#errorMsgId").html("Success");
     }).fail(function() {
-        errorMsg = "Failure to get server data during team edit submission, please retry"
-        $("errorMsgId").html(errorMsg);
-        $("errorMsgId").addClass("badInput");
+        errorMsg = "Failure to delete Team request due to server issues, please retry"
+        $("#errorMsgId").html(errorMsg);
+        $("#errorMsgId").addClass("badInput");
     })
 }
 
@@ -1547,34 +1503,45 @@ function getRegTeamMemb(team) {
     $("#newMembForm").append(inputDiv);
     // Gender selection radio box
     $("#newMembForm").append($("<div>")
-        .attr("class", "row form-check form-check-inline col-md-8 ml-2 mt-1")
-        .append($("<div/>")
-            .attr("class", "offset-md-6"))
-        .append($("<div/>")
-            .attr("id", "maleDiv")
-            .append($("<input/>")
-                .attr("class", "form-check-input ml-4")
-                .attr("name", "gender")
-                .attr("id", "male")
-                .val("Male")
-                .attr("type", "radio")
-                .attr("checked", true))
-            .append($("<label/>")
-                .attr("class", " form-check-label")
-                .attr("for", "male")
-                .html("Male")))
-        .append($("<div/>")
-            .attr("id", "femaleDiv")
-            .append($("<input/>")
-                .attr("class", "form-check-input ml-4")
-                .attr("name", "gender")
-                .attr("id", "female")
-                .val("Female")
-                .attr("type", "radio"))
-            .append($("<label/>")
-                .attr("class", "form-check-label")
-                .attr("for", "female")
-                .html("Female"))))
+            .attr("class", "row form-check form-check-inline col-md-8 ml-2 mt-1")
+            .append($("<div/>")
+                .attr("class", "offset-md-6"))
+            .append($("<div/>")
+                .attr("id", "maleDiv")
+                .append($("<input/>")
+                    .attr("class", "form-check-input ml-4")
+                    .attr("name", "gender")
+                    .attr("id", "male")
+                    .val("Male")
+                    .attr("type", "radio")
+                    .attr("checked", true))
+                .append($("<label/>")
+                    .attr("class", " form-check-label")
+                    .attr("for", "male")
+                    .html("Male")))
+            .append($("<div/>")
+                .attr("id", "femaleDiv")
+                .append($("<input/>")
+                    .attr("class", "form-check-input ml-4")
+                    .attr("name", "gender")
+                    .attr("id", "female")
+                    .val("Female")
+                    .attr("type", "radio"))
+                .append($("<label/>")
+                    .attr("class", "form-check-label")
+                    .attr("for", "female")
+                    .html("Female"))))
+        //Set member genderr radio based on team gender selection
+    if (team.TeamGender == "Male") {
+        $("#male").attr("checked", true);
+        $("#female").attr("checked", false);
+    } else if (team.TeamGender == "Female") {
+        $("#male").attr("checked", false);
+        $("#female").attr("checked", true);
+    } else {
+        $("#male").attr("checked", false);
+        $("#female").attr("checked", false);
+    }
 
     // Submit the form to server & update the member
     $("#newMembForm").append($("<div/>")
@@ -1899,6 +1866,14 @@ function loadMemb(member) {
     $("#age").val(member.Age);
     $("#phone").val(member.Phone);
     $("input[name=gender]:checked").val(member.Gender);
+
+    if (member.Gender == "Male") {
+        $("#male").attr("checked", true);
+        $("#female").attr("checked", false);
+    } else {
+        $("#male").attr("checked", false);
+        $("#female").attr("checked", true);
+    }
 }
 
 /* function is to set attributes for display team member section  
@@ -2054,46 +2029,4 @@ function subDelMemb(MemberId, team) {
         $("#errorMsgId").html(errorMsg);
         $("#errorMsgId").addClass("badInput");
     })
-}
-
-///////////////////////////////////////////////////
-
-/* function is to update service card from the server returned service object 
- * @param serviceItem (javastring object) - contains selected service object details
- * calls: None
- */
-/*
-    //first 3 characters of serviceID will match the image name to populate the images
-    let imgName = serviceItem.ServiceID.substr(0, 3) + ".jpg";
-    $("#cardImg").attr("src", "images/" + imgName);
-    //service ID has been set as alt text for any future enhancments
-    $("#cardImg").attr("alt", serviceItem.ServiceID);
-    $("#cardImg").attr("class", "hideimage");
-    //Populate the below details for user information
-    $("#serviceName").html(serviceItem.ServiceName);
-    $("#serviceDescription").html(serviceItem.Description);
-    $("#servicePrice").html("$" + serviceItem.Price);
-    $("#serviceDuration").html(serviceItem.Minutes + "\t" + "Mins");
-
-    //Set user rating based on 1st number of price. Will be enhanced to get user input and update database.
-    let userRatingNum = Number(serviceItem.Price.substr(0, 1));
-    let userRating = 0;
-    // clear the user rating upon each service item selection
-    $("#userRating").empty();
-    for (i = 0; i <= userRatingNum; i++) {
-        $("#userRating").append($("<span/>")
-            .attr("class", "fa fa-star text-warning checked"));
-        userRating = i + 1;
-        if (i >= 4) {
-            break;
-        }
-    }
-    while (userRating < 5) {
-        $("#userRating").append($("<span/>")
-            .attr("class", "fa fa-star"));
-        userRating++;
-    }
-    //Show the service card upon successful loading of service info
-    $("#serviceCard").show();
-}
-*/
+};

@@ -8,7 +8,11 @@
     footer {
         padding-left: 1.5rem;
     }
-    /* Error message validation color */
+    
+    .red {
+        color: red;
+    }
+    /* Error & Informational message validation color */
     
     #errorMsgId {
         color: green;
@@ -17,9 +21,16 @@
     #errorMsgId.badInput {
         color: red;
     }
-    /* Apply video width for nice view for phone number and other fields*/
+    /* Apply image width for team logo for nice view for phone number and other fields*/
     
     .imageWidth {
+        width: 100%;
+        height: 75%;
+        border-radius: 50px;
+    }
+    /* Apply video width for quick cricket intro */
+    
+    .videoWidth {
         width: 100%;
         height: 100%;
     }
@@ -27,7 +38,7 @@
     
     .bgMediumImage {
         background-image: url("../images/bg_logo.png");
-        background-size: 100%;
+        background-size: 50%;
     }
     /*blockquote style for Cricketer's quote in Home page*/
     
@@ -35,7 +46,7 @@
         font-family: Georgia, serif;
         font-size: 18px;
         font-style: italic;
-        width: 500px;
+        width: 100%;
         margin: 0.25em 0;
         padding: 0.35em 40px;
         line-height: 1.45;
@@ -60,8 +71,8 @@
         content: "\201D";
         font-size: 80px;
         position: absolute;
-        right: 270px;
-        top: 75px;
+        right: 200px;
+        top: 100px;
         color: #5bc0de;
     }
     /* Apply for the list items in the home page for navigation */
@@ -84,6 +95,16 @@
         h3 {
             font-size: 1.25em;
         }
+        .blockquote:after {
+            display: block;
+            padding-left: 10px;
+            content: "\201D";
+            font-size: 80px;
+            position: absolute;
+            right: 300px;
+            top: 75px;
+            color: #5bc0de;
+        }
     }
     /* Medium devices (landscape tablets, 768px and up) */
     
@@ -99,6 +120,16 @@
         }
         h3 {
             font-size: 1.25em;
+        }
+        .blockquote:after {
+            display: block;
+            padding-left: 10px;
+            content: "\201D";
+            font-size: 80px;
+            position: absolute;
+            right: 200px;
+            top: 100px;
+            color: #5bc0de;
         }
     }
     /* Large devices (laptops/desktops, 992px and up) */

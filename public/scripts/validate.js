@@ -38,8 +38,14 @@ function validateMemb(inputData, team) {
     }
 
     //Gender validation
-    if ((inputData.gender.trim() == "") || (inputData.gender != team.TeamGender)) {
-        resp.errorMsg[resp.errorMsg.length] = `Allowed Team Gender is ${team.TeamGender} `;
+    if (inputData.gender != undefined) {
+        if ((inputData.gender.trim() == "") || (inputData.gender != team.TeamGender)) {
+            if (team.TeamGender != "Any") {
+                resp.errorMsg[resp.errorMsg.length] = `Allowed Team Gender is ${team.TeamGender} `;
+            }
+        }
+    } else {
+        resp.errorMsg[resp.errorMsg.length] = "Select Gender";
     }
 
     // Reg expression to validate for 2 digits and business rule for min member age 
@@ -63,7 +69,7 @@ function validateMemb(inputData, team) {
  * calls: None
  * called by:validateForm
  */
-function validate(inputData) {
+function validate(inputData, team) {
     let resp = {
         status: "",
         errorMsg: []
@@ -112,8 +118,48 @@ function validate(inputData) {
         resp.errorMsg[resp.errorMsg.length] = "Maximum allowed age is not older than 40";
     }
 
+    //Team age validation against existing member
+    if (team != undefined & team.Members.length > 0) {
+        let minAge = getMinAgeOfMember(team);
+        let maxAge = getMaxAgeOfMember(team);
+
+        if (Number(inputData.minmemberage) > minAge) {
+            resp.errorMsg[resp.errorMsg.length] = `Age limit is lower than already enrolled minimum member ${minAge}`;
+        }
+        if (Number(inputData.maxmemberage) < maxAge) {
+            resp.errorMsg[resp.errorMsg.length] = `Age limit is higher than already enrolled member age ${maxAge}`;
+        }
+    }
+    // Validate and populate error message
     if (resp.errorMsg.length > 0) {
         resp.status = true;
     }
     return resp;
+}
+
+// ------ Membership change conflict helpers ------------------
+/*function is to calculate the minimum age of existing members
+ * @param team (javastring object) - contains team data
+ */
+function getMinAgeOfMember(team) {
+    let minAge = 100000;
+    for (let i = 0; i < team.Members.length; i++) {
+        if (Number(team.Members[i].Age) < minAge) {
+            minAge = Number(team.Members[i].Age);
+        }
+    }
+    return minAge;
+}
+
+/*function is to calculate the maximum age of existing members
+ * @param team (javastring object) - contains team data
+ */
+function getMaxAgeOfMember(team) {
+    let maxAge = -1;
+    for (let i = 0; i < team.Members.length; i++) {
+        if (Number(team.Members[i].Age) > maxAge) {
+            maxAge = Number(team.Members[i].Age);
+        }
+    }
+    return maxAge;
 }
