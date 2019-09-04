@@ -43,6 +43,7 @@ $(function() {
 /* function is to show the respective home sections view upon clicking on Home from the navigation bar 
  * @param: None
  * Calls: None
+ * Called by: Window onload
  */
 function showHome() {
     $("#home").attr("class", "active");
@@ -53,6 +54,7 @@ function showHome() {
 /* function is to show the respective services information sections view upon clicking on Leagues from the navigation bar 
  * @param:  None
  * Calls: None
+ * Called by Window onload
  */
 function showLeagues() {
     //Set attribute of home section and leagues section
@@ -63,7 +65,8 @@ function showLeagues() {
 
 /* function is to get the home section DOM content by dynamically populating them 
  * @param: None
- * Calls: None
+ * Calls: getLeagues(), getQuoteTag()
+ * Called by: window onload
  */
 function getHomeSection() {
     $("#contentDiv").empty();
@@ -121,7 +124,7 @@ function getHomeSection() {
                         .attr("class", "imageWidth")
                         .attr("src", "https://www.youtube.com/embed/Kwu1yIC-ssg")
                         .attr("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture")
-                        .attr("allowfullscreen", "true")))
+                        .attr("allowfullscreen", "allowfullscreen")))
                 //Quotes Div
                 .append($("<div/>")
                     .attr("class", "row")
@@ -151,6 +154,7 @@ function getHomeSection() {
 /* function is to get league data from server and call loadLeague to dynamically populate the DOM 
  * @param: None
  * Calls: loadleagues()
+ * Called by: getHomeSection()
  */
 function getLeagues() {
     // Store the JSON data in javaScript objects (Pull categories for the offered Ayurvedic services).  
@@ -162,7 +166,6 @@ function getLeagues() {
             // Store leagues in local storage to access for generating league section
             localStorage.setItem("leaguesLocal", JSON.stringify(leagues));
             loadleagues(leagues);
-            // $("#categoryContainer").hide();
         })
         .fail(function() {
             // upon failure response, send message to user
@@ -170,12 +173,12 @@ function getLeagues() {
             $("#errorMsgId").html(errorMsg);
             $("#errorMsgId").addClass("badInput");
         });
-
 }
 
 /* function is to get league data from server and call loadLeague to dynamically populate the DOM 
  * @param: leagues (JSON object) - list of leagues retrieved from server
  * Calls: None
+ * Called by:getLeagues()
  */
 function loadleagues(leagues) {
     //Run through each leagues entry and populate 
@@ -210,6 +213,7 @@ function loadleagues(leagues) {
 /* function is to get quote tag from server and populate the value dynamically  
  * @param: None
  * Calls: None
+ * Called by: getHomeSection
  */
 function getQuoteTag() {
     $.getJSON("/api/quotes/", function(data) {
@@ -231,6 +235,7 @@ function getQuoteTag() {
 /* function is to load quote tag from JSON every x seconds and populate the blockquote section dynamically  
  * @param: quotes - quote tag json received from server
  * Calls: None
+ * Called by: getQuoteTag
  */
 function loadQuotes(quotes) {
     let i = 0;
@@ -245,12 +250,13 @@ function loadQuotes(quotes) {
     //     if (i == maxQuotes) {
     //         i = 0;
     //     }
-    // }, 80000);
+    // }, 10000);
 }
 
 /* function is to get Team Rankings from teams data to display readerboard 
  * @param: leagues (Javascript objects) - List of leagues
  * Calls: loadRankingItem()
+ * Called by: loadleagues()
  */
 function getRankings(leagues) {
     let rankingArray = [];
@@ -281,29 +287,23 @@ function getRankings(leagues) {
 /* function is to get Team Rankings from teams data to display readerboard 
  * @param: team (Javascript object) - Topmost team under particular league
  * Calls: None
+ * Called by: getRankings
  */
 function loadRankingItem(team) {
+    //Ranking table for top team in each league
     $("#rankingTbody").append($("<tr/>")
         .append($("<td/>")
             .html(team.League))
         .append($("<td/>")
             .html(team.TeamName)));
-    // $("#rankingUl").append($("<li/>")
-    //     .attr("class", "list-inline-item")
-    //     .append($("<a/>")
-    //         .attr("href", "#")
-    //         .attr("class", "non-underline-link")
-    //         .append($("<br/>"))
-    //         .append($("<span/>")
-    //             .attr("class", "text-secondary text-center")
-    //             .text(`${team.League} <\n> ${team.TeamName}`))
-    //         .on("click", function(e) {
-    //             // prevent all default action and do as we direct
-    //             e.preventDefault();
-    //             console.log("onclick worked");
-    //         })));
 }
 
+/* function is to get league Section for display  
+ * @param: leagueCode (string) - league code indicating league option
+ * Calls: loadleaguesForLeagueSection()
+ * Called by: getRegTeam(), submitRegForm(), loadTeamDetails(), getDelTeam(), 
+ * getDelTeam(), window onload, loadleagues()
+ */
 function getleagueSection(leagueCode) {
     let leaguesLocalStorage = JSON.parse(localStorage.getItem("leaguesLocal"));
 
@@ -313,12 +313,11 @@ function getleagueSection(leagueCode) {
         $("#errorMsgId").addClass("badInput");
     } else {
         if (leagueCode == undefined) {
-            console.log("default");
             // Store the JSON data in javaScript objects (Pull categories for the offered Ayurvedic services).  
             loadleaguesForLeagueSection(leagues, leagueCode);
         } else {
+            // Selected particular league
             loadleaguesForLeagueSection(leagues, leagueCode);
-            console.log("selected particular league code")
         }
     }
 }
@@ -481,48 +480,70 @@ function getRegTeam(leaguesLocalStorage) {
     $("#newTeamForm").append(inputDiv);
     inputDiv = getInputDiv("maxmemberage", "Maximum Member Age", "Enter Maximum Member Age", "number");
     $("#newTeamForm").append(inputDiv);
+
+    //Image file inputDiv (In-progress)
+    // $("#newTeamForm").append($("<div/>")
+    //     .attr("class", "input-group row offset-md-3 col-md-6 mt-1 form-inline")
+    //     .append($("<div/>")
+    //         .attr("class", "input-group-prepend")
+    //         .append($("<span/>")
+    //             .attr("class", "input-group-text")
+    //             .attr("id", "inputGroupFileAddon01")))
+    //     .append($("<div/>")
+    //         .attr("class", "custom-file")
+    //         .append($("<input/>")
+    //             .attr("type", "file")
+    //             .attr("class", "custom-file-input")
+    //             .attr("name", "teamimage")
+    //             .attr("id", "teamimage")
+    //             .attr("aria-describedby", "inputGroupFileAddon01"))
+    //         .append($("<label/>")
+    //             .attr("class", "custom-file-label")
+    //             .attr("for", "inputGroupFile01")
+    //             .attr("text", "Choose file"))))
+
     // Gender selection radio box
     $("#newTeamForm").append($("<div>")
-        .attr("class", "row form-check form-check-inline col-md-8 ml-2 mt-1")
+        .attr("class", "row form-check form-check-inline col-md-6 ml-2 mt-1")
         .append($("<div/>")
             .attr("class", "offset-md-6"))
         .append($("<div/>")
             .attr("id", "maleDiv")
-            .append($("<label/>")
-                .attr("class", " form-check-label")
-                .attr("for", "male")
-                .html("Male"))
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "teamgender")
                 .attr("id", "male")
                 .val("Male")
                 .attr("type", "radio")
-                .attr("checked", true)))
+                .attr("checked", true))
+            .append($("<label/>")
+                .attr("class", " form-check-label")
+                .attr("for", "male")
+                .html("Male")))
         .append($("<div/>")
             .attr("id", "femaleDiv")
-            .append($("<label/>")
-                .attr("class", "form-check-label")
-                .attr("for", "female")
-                .html("Female"))
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "teamgender")
                 .attr("id", "female")
                 .val("Female")
-                .attr("type", "radio")))
-        .append($("<div/>")
-            .attr("id", "anyDiv")
+                .attr("type", "radio"))
             .append($("<label/>")
                 .attr("class", "form-check-label")
-                .attr("for", "any")
-                .html("Any"))
+                .attr("for", "female")
+                .html("Female")))
+        .append($("<div/>")
+            .attr("id", "anyDiv")
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "teamgender")
                 .attr("id", "any")
                 .val("Any")
-                .attr("type", "radio"))))
+                .attr("type", "radio"))
+            .append($("<label/>")
+                .attr("class", "form-check-label")
+                .attr("for", "any")
+                .html("Any"))))
 
     // Submit the form to server & update the teams data
     $("#newTeamForm").append($("<div/>")
@@ -587,7 +608,8 @@ function getInputDiv(name, text, placeHolder, inputType) {
 /* function is to hide and show the gender option based on the league selection 
  * @param: leagueCode (string) - selected league from registering a team section
  * @param: leaguesLocalStorage(javastring object) - leagues object to match and find the supported gender
- * Calls: getleagueSection()
+ * Calls: None()
+ * Called by:
  */
 function setGender(leagueCode, leaguesLocalStorage) {
     let leagueGender;
@@ -866,6 +888,7 @@ function createTableHead() {
                 .html("Points"))
             .append($("<th/>")
                 .html("More Info"))
+            // Show edit and delete action on team upon showing team details
             // .append($("<th/>")
             //     .html("Edit"))
             // .append($("<th/>")
@@ -903,10 +926,6 @@ function getTeamDetail(TeamId) {
  */
 function loadTeamDetails(team) {
     $("#contentDiv").empty();
-
-    // let modalDiv = getModalTemplate("unRegisterDivLabel", "unRegisterDiv")
-    // $("#contentDiv").append(modalDiv);
-    // $("#unRegisterDivLabel").html("Team UnRegistration");
 
     $("#contentDiv").attr("class", "container justified-content-center")
         // Team Details Section
@@ -996,7 +1015,7 @@ function loadTeamDetails(team) {
                         .attr("data-target", "#unRegisterDiv")
                         .html("Delete Team")
                         .on("click", function(e) {
-                            e.preventDefault();
+                            // e.preventDefault();
                             //Get up to date team details from server which would help to mark the record for edit in the future 
                             //to avoid any update from other user
                             getDelTeam(team.TeamId);
@@ -1010,6 +1029,8 @@ function loadTeamDetails(team) {
                         .html("Go Back")
                         .on("click", function(e) {
                             e.preventDefault();
+                            //Clear the Informational message
+                            $("#errorMsgId").empty();
                             let leagueSelection = sessionStorage.getItem("leagueSelSession");
                             getleagueSection(leagueSelection);
                         })))
@@ -1021,6 +1042,8 @@ function loadTeamDetails(team) {
                         .html("Register Member")
                         .on("click", function(e) {
                             e.preventDefault();
+                            //Clear the Informational message
+                            $("#errorMsgId").empty();
                             getRegTeamMemb(team);
                         })))
             )
@@ -1041,12 +1064,6 @@ function loadTeamDetails(team) {
 
     // Load Team member section
     loadTeamMember(team);
-
-    // Modal changes
-    $('#unRegisterDiv').on('shown.bs.modal', function() {
-        console.log("true");
-        $("#unRegisterDiv").modal(focus);
-    });
 }
 
 /* function is to generate DOM for team member for selected team 
@@ -1078,6 +1095,7 @@ function loadTeamMember(team) {
                         $("#errorMsgId").empty();
                         getTeamMembDetails(value.MemberId, team);
                     })))
+            // Give the option of delete and edit upon showing the member info page
             //override if edit, delete and info on team members tab
             // .append($("<td/>")
             //     .append($("<a/>")
@@ -1203,14 +1221,6 @@ function loadEditTeamDetails(team) {
             .attr("id", "leaguecode")
             .attr("name", "leaguecode")
             .attr("class", "d-inline form-control col-md-6")
-            // .on("change", function(e) {
-            //     // prevent all default action and do as we direct
-            //     e.preventDefault();
-            //     // Clear all prior error messages
-            //     $("#errorMsgId").empty();
-            //     let leagueCode = $("#leaguecode").val();
-            //     setGender(leagueCode, leaguesLocalStorage);
-            // })
             //Add default option and view all option
             .append($("<option/>")
                 .val("")
@@ -1243,40 +1253,40 @@ function loadEditTeamDetails(team) {
             .attr("class", "offset-md-6"))
         .append($("<div/>")
             .attr("id", "maleDiv")
-            .append($("<label/>")
-                .attr("class", " form-check-label")
-                .attr("for", "male")
-                .html("Male"))
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "teamgender")
                 .attr("id", "male")
                 .val("Male")
-                .attr("type", "radio")))
+                .attr("type", "radio"))
+            .append($("<label/>")
+                .attr("class", " form-check-label")
+                .attr("for", "male")
+                .html("Male")))
         .append($("<div/>")
             .attr("id", "femaleDiv")
-            .append($("<label/>")
-                .attr("class", "form-check-label")
-                .attr("for", "female")
-                .html("Female"))
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "teamgender")
                 .attr("id", "female")
                 .val("Female")
-                .attr("type", "radio")))
-        .append($("<div/>")
-            .attr("id", "anyDiv")
+                .attr("type", "radio"))
             .append($("<label/>")
                 .attr("class", "form-check-label")
-                .attr("for", "any")
-                .html("Any"))
+                .attr("for", "female")
+                .html("Female")))
+        .append($("<div/>")
+            .attr("id", "anyDiv")
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "teamgender")
                 .attr("id", "any")
                 .val("Any")
-                .attr("type", "radio"))))
+                .attr("type", "radio"))
+            .append($("<label/>")
+                .attr("class", "form-check-label")
+                .attr("for", "any")
+                .html("Any"))))
 
     // Submit the form to server & update the teams data
     $("#editTeamForm").append($("<div/>")
@@ -1333,6 +1343,7 @@ function loadEditTeamDetails(team) {
  */
 function loadTeamItem(team, leaguesLocalStorage) {
     $("#teamid").val(team.TeamId);
+    $("#teamid").parent().hide();
     $("#teamname").val(team.TeamName);
     $("#leaguecode").val(team.League);
     $("#managername").val(team.ManagerName);
@@ -1345,6 +1356,7 @@ function loadTeamItem(team, leaguesLocalStorage) {
 
     //Set attribute
     $("#teamid").attr("readonly", true);
+    //Fix this
     $("#leaguecode").attr("readonly", true);
     let leagueCode = $("#leaguecode").val();
     setGender(leagueCode, leaguesLocalStorage);
@@ -1382,10 +1394,31 @@ function submitEditForm(TeamId) {
  */
 function getDelTeam(TeamId) {
 
-    //Modal generation
+    //Clear modal upon each execution
     $("#unRegisterDiv").remove();
     let modalDiv = getModalTemplate("unRegisterDivLabel", "unRegisterDiv", "unRegModalBody", "unRegModalFooter");
     $("#contentDiv").append(modalDiv);
+
+    //Modal event handler assignment
+    //Modal event to show during focus
+    $('#unRegisterDiv').on('shown.bs.modal', function() {
+        $("#unRegisterDiv").modal(focus);
+    });
+
+    //Modal event handler during modal closure to show the league page with selected option
+    $('#unRegisterDiv').on('hidden.bs.modal', function(e) {
+        //"Success" status indicates that team has been deleted and good to shift the focus
+        if ($("#errorMsgId").html() == "Success") {
+            let leagueSelection = sessionStorage.getItem("leagueSelSession");
+            getleagueSection(leagueSelection);
+            //Clear the empty and set successful message
+            $("#errorMsgId").empty();
+            errorMsg = "Team has been successfully deleted";
+            $("#errorMsgId").html(errorMsg);
+            $("#errorMsgId").removeClass("badInput");
+            setTimeout("$('#leagues').focus();", 200);
+        }
+    });
 
     //Set title for modal
     $("#unRegisterDivLabel").text("Team UnRegistration");
@@ -1455,7 +1488,7 @@ function getModalTemplate(label, id, modalBodyId, modalFooterId) {
 
 /* function is to submit teamId to be deleted to server and go back to leagues section
  * @param TeamId (Number) - contains selected TeamId to delete team
- * calls: getleagueSection()
+ * calls: None
  * called by: getDelTeam()
  */
 function subDelTeam(TeamId) {
@@ -1465,13 +1498,9 @@ function subDelTeam(TeamId) {
         // data: $("#editTeamForm").serialize()
         // contentType: 'application/json'
     }).done(function() {
-        $("errorMsgId").empty();
-        errorMsg = "Team has been successfully deleted";
-        $("errorMsgId").html(errorMsg);
-        $("errorMsgId").removeClass("badInput");
-        $("#unRegisterDiv").modal(hide);
-        let leagueSelection = sessionStorage.getItem("leagueSelSession");
-        getleagueSection(leagueSelection);
+        //Set informational delete status to change the focus to league page upon modal closure
+        $("#errorMsgId").empty();
+        $("#errorMsgId").html("Success");
     }).fail(function() {
         errorMsg = "Failure to get server data during team edit submission, please retry"
         $("errorMsgId").html(errorMsg);
@@ -1523,29 +1552,29 @@ function getRegTeamMemb(team) {
             .attr("class", "offset-md-6"))
         .append($("<div/>")
             .attr("id", "maleDiv")
-            .append($("<label/>")
-                .attr("class", " form-check-label")
-                .attr("for", "male")
-                .html("Male"))
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "gender")
                 .attr("id", "male")
                 .val("Male")
                 .attr("type", "radio")
-                .attr("checked", true)))
+                .attr("checked", true))
+            .append($("<label/>")
+                .attr("class", " form-check-label")
+                .attr("for", "male")
+                .html("Male")))
         .append($("<div/>")
             .attr("id", "femaleDiv")
-            .append($("<label/>")
-                .attr("class", "form-check-label")
-                .attr("for", "female")
-                .html("Female"))
             .append($("<input/>")
                 .attr("class", "form-check-input ml-4")
                 .attr("name", "gender")
                 .attr("id", "female")
                 .val("Female")
-                .attr("type", "radio"))))
+                .attr("type", "radio"))
+            .append($("<label/>")
+                .attr("class", "form-check-label")
+                .attr("for", "female")
+                .html("Female"))))
 
     // Submit the form to server & update the member
     $("#newMembForm").append($("<div/>")
@@ -1558,6 +1587,8 @@ function getRegTeamMemb(team) {
                 .html("Submit")
                 .on("click", function(e) {
                     e.preventDefault();
+                    // clear any informational message
+                    $("#errorMsgId").empty();
                     submitRegMembForm(team);
                 })))
         // button to reset the member registration form
@@ -1567,6 +1598,12 @@ function getRegTeamMemb(team) {
                 .attr("class", "btn btn-sm btn-block btn-primary btn-danger")
                 .attr("type", "reset")
                 .html("Reset")
+                .on("click", function(e) {
+                    e.preventDefault();
+                    // clear any informational message
+                    $("#errorMsgId").empty();
+                    resetRegMembForm();
+                })
             ))
         // button to go back to team details page on cancel 
         .append($("<div/>")
@@ -1643,6 +1680,24 @@ function validateMembForm(team) {
     }
 }
 
+/* function is to reset register member without resetting the team name
+ * @param: None
+ * calls: None
+ * called by: getRegTeamMemb()
+ */
+
+function resetRegMembForm() {
+    $("#membername").val("");
+    $("#email").val("");
+    $("#contactname").val("");
+    $("#age").val("");
+    $("#phone").val("");
+    //Reset Gender Status
+    $("input[name=gender]:checked").val("Male");
+    $("input[name=teamgender]:checked").prop("checked", false);
+    $("#male").prop("checked", true);
+}
+
 /* function is to populate team member profile template and set event  
  * handlers for various action such as edit, delete, cancel, reset and Goback
  * @param MemberId (Number) - User selected team member's ID 
@@ -1687,36 +1742,35 @@ function getTeamMembDetails(MemberId, team) {
     $("#editMembForm").append(inputDiv);
     // Gender selection radio box
     $("#editMembForm").append($("<div>")
-        .attr("class", "row form-check form-check-inline col-md-8 ml-2 mt-1")
-        .append($("<div/>")
-            .attr("class", "offset-md-6"))
-        .append($("<div/>")
-            .attr("id", "maleDiv")
-            .append($("<label/>")
-                .attr("class", " form-check-label")
-                .attr("for", "male")
-                .html("Male"))
-            .append($("<input/>")
-                .attr("class", "form-check-input ml-4")
-                .attr("name", "gender")
-                .attr("id", "male")
-                .val("Male")
-                .attr("type", "radio")
-                .attr("checked", true)))
-        .append($("<div/>")
-            .attr("id", "femaleDiv")
-            .append($("<label/>")
-                .attr("class", "form-check-label")
-                .attr("for", "female")
-                .html("Female"))
-            .append($("<input/>")
-                .attr("class", "form-check-input ml-4")
-                .attr("name", "gender")
-                .attr("id", "female")
-                .val("Female")
-                .attr("type", "radio"))))
-
-    // Button for action on members 
+            .attr("class", "row form-check form-check-inline col-md-8 ml-2 mt-1")
+            .append($("<div/>")
+                .attr("class", "offset-md-6"))
+            .append($("<div/>")
+                .attr("id", "maleDiv")
+                .append($("<input/>")
+                    .attr("class", "form-check-input ml-4")
+                    .attr("name", "gender")
+                    .attr("id", "male")
+                    .val("Male")
+                    .attr("type", "radio")
+                    .attr("checked", true))
+                .append($("<label/>")
+                    .attr("class", " form-check-label")
+                    .attr("for", "male")
+                    .html("Male")))
+            .append($("<div/>")
+                .attr("id", "femaleDiv")
+                .append($("<input/>")
+                    .attr("class", "form-check-input ml-4")
+                    .attr("name", "gender")
+                    .attr("id", "female")
+                    .val("Female")
+                    .attr("type", "radio"))
+                .append($("<label/>")
+                    .attr("class", "form-check-label")
+                    .attr("for", "female")
+                    .html("Female"))))
+        // Button for action on members 
     $("#editMembForm").append($("<div/>")
         .attr("class", "row offset-md-4 col-md-8")
         .attr("id", "dispMembDiv")
@@ -1725,7 +1779,7 @@ function getTeamMembDetails(MemberId, team) {
             .append($("<button/>")
                 .attr("class", "btn btn-sm btn-block btn-primary btn-info")
                 .attr("type", "button")
-                .html("Edit Memb")
+                .html("Edit")
                 .on("click", function(e) {
                     e.preventDefault();
                     //Clear prior informational message
@@ -1737,8 +1791,10 @@ function getTeamMembDetails(MemberId, team) {
             .attr("class", "mt-3 col-md-2")
             .append($("<button/>")
                 .attr("class", "btn btn-sm btn-block btn-primary btn-danger")
+                .attr("data-toggle", "modal")
+                .attr("data-target", "#unRegisterMemberDiv")
                 .attr("type", "button")
-                .html("Delete Memb")
+                .html("Delete")
                 .on("click", function(e) {
                     e.preventDefault();
                     //Clear prior informational message
@@ -1836,6 +1892,7 @@ function getMember(MemberId, TeamId) {
  */
 function loadMemb(member) {
     $("#memberid").val(member.MemberId);
+    $("#memberid").parent().hide();
     $("#membername").val(member.MemberName);
     $("#email").val(member.Email);
     $("#contactname").val(member.ContactName);
@@ -1865,7 +1922,6 @@ function setDispMembAttr() {
         $("#femaleDiv").show();
         $("#maleDiv").hide();
     }
-
     $("#dispMembDiv").show();
     $("#editMembDiv").hide();
 
@@ -1910,7 +1966,6 @@ function subEditMembForm(MemberId, team) {
             url: `/api/teams/${team.TeamId}/members`,
             type: "PUT",
             data: $("#editMembForm").serialize()
-                // contentType: 'application/json'
         }).done(function() {
             // clear any informational message
             $("#errorMsgId").empty();
@@ -1932,7 +1987,51 @@ function subEditMembForm(MemberId, team) {
  * Called By: getTeamMembDetails()
  */
 function delMemb(MemberId, team) {
-    subDelMemb(MemberId, team);
+
+    //Initialize modal before populating new one
+    $("#unRegisterMemberDiv").remove();
+    let modalDiv = getModalTemplate("unRegisterMemberDivLabel", "unRegisterMemberDiv", "unRegMemberModalBody", "unRegMemberModalFooter");
+    $("#contentDiv").append(modalDiv);
+
+    //Modal event handler assignments
+    //Modal event to show during focus
+    $('#unRegisterMemberDiv').on('shown.bs.modal', function() {
+        $("#unRegisterMemberDiv").modal(focus);
+    });
+
+    //Modal event handler during modal closure to show the league page with selected option
+    $('#unRegisterMemberDiv').on('hidden.bs.modal', function(e) {
+        //"Success" status indicates that team has been deleted and good to shift the focus
+        if ($("#errorMsgId").html() == "Success") {
+            getTeamDetail(team.TeamId);
+            errorMsg = "Member has been successfully deleted";
+            $("#errorMsgId").html(errorMsg);
+            $("#errorMsgId").removeClass("badInput");
+            setTimeout("$('#contentDiv').focus();", 200);
+        }
+    });
+
+    //Set title for modal
+    $("#unRegisterMemberDivLabel").text("Team Member UnRegistration");
+    //Set modal body content for generated modal template
+    $("#unRegMemberModalBody").append($("<p/>")
+            .html("Delete the Member"))
+        //button to perform operation
+    $("#unRegMemberModalFooter")
+        //cancel button will take back to details page through modal setup
+        .append($("<button/>")
+            .attr("class", "btn btn-secondary")
+            .attr("data-dismiss", "modal")
+            .html("Cancel"))
+        //confirm button to submit the delete team to server
+        .append($("<button/>")
+            .attr("class", "btn btn-primary btn-danger")
+            .attr("data-dismiss", "modal")
+            .html("Confirm")
+            .on("click", function(e) {
+                e.preventDefault();
+                subDelMemb(MemberId, team);
+            }))
 }
 
 /* function is to delete team member by sending data to server and set information message
@@ -1947,12 +2046,9 @@ function subDelMemb(MemberId, team) {
         type: "DELETE",
         // contentType: 'application/json'
     }).done(function() {
-        //Clear prior informational message
+        //Clear prior informational message and set Success status to shift focus
         $("#errorMsgId").empty();
-        getTeamDetail(team.TeamId);
-        errorMsg = "Member has been successfully deleted";
-        $("#errorMsgId").html(errorMsg);
-        $("#errorMsgId").removeClass("badInput");
+        $("#errorMsgId").html("Success");
     }).fail(function() {
         errorMsg = "Failure to delete team member due to issue, please retry"
         $("#errorMsgId").html(errorMsg);
@@ -1966,46 +2062,7 @@ function subDelMemb(MemberId, team) {
  * @param serviceItem (javastring object) - contains selected service object details
  * calls: None
  */
-function loadService(serviceItem) {
-
-    //Dynamically create the div and its child for service card & Clear them before populating new item
-    $("#serviceCard").empty();
-    // Create card div, header, image and body & assign ID for futher reference
-    $("#serviceCard")
-        .append(($("<div/>")
-            .attr("class", "card mb-4 box-shadow cardStyle border-info")
-            .append($("<div/>")
-                .attr("class", "card-header text-center")
-                .attr("id", "cardHead")
-                .append($("<h3/>")
-                    .attr("id", "serviceName")
-                    .text("&nbsp;")))
-            .append($("<img/>")
-                .attr("class", "card-img-top cardImgStyle text-left")
-                .attr("id", "cardImg"))
-            .append($("<div/>")
-                .attr("class", "card-body")
-                .attr("id", "cardBody"))));
-    $("#cardBody")
-        .append($("<h4/>")
-            .attr("id", "servicePrice")
-            .attr("class", "card-title pricing-card-title"))
-        .append($("<ul/>")
-            .attr("class", "list-unstyled mt-3 mb-4")
-            .attr("id", "cardUl"))
-        .append($("<span/>")
-            .attr("class", "heading")
-            .text("User Rating"))
-        .append($("<p/>")
-            .attr("id", "userRating"));
-
-    $("#cardUl").append($("<li/>")
-            .attr("id", "serviceDescription")
-            .text("&nbsp;"))
-        .append($("<li/>")
-            .attr("id", "serviceDuration")
-            .text("&nbsp;"));
-
+/*
     //first 3 characters of serviceID will match the image name to populate the images
     let imgName = serviceItem.ServiceID.substr(0, 3) + ".jpg";
     $("#cardImg").attr("src", "images/" + imgName);
@@ -2039,3 +2096,4 @@ function loadService(serviceItem) {
     //Show the service card upon successful loading of service info
     $("#serviceCard").show();
 }
+*/

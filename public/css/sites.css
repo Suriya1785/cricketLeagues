@@ -17,11 +17,6 @@
     #errorMsgId.badInput {
         color: red;
     }
-    /*Apply styles for modal*/
-    
-    .modalSize {
-        max-width: 600px!important;
-    }
     /* Apply video width for nice view for phone number and other fields*/
     
     .imageWidth {
