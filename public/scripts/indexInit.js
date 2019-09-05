@@ -489,23 +489,12 @@ function getRegTeam(leaguesLocalStorage) {
     //Image file input definition
     $("#newTeamForm").append($("<div/>")
         .attr("class", "input-group row offset-md-3 col-md-6 mt-1 form-inline")
-        .append($("<div/>")
-            .attr("class", "input-group-prepend")
-            .append($("<span/>")
-                .attr("class", "input-group-text")
-                .attr("id", "inputGroupFileAddon01")))
-        .append($("<div/>")
-            .attr("class", "custom-file")
-            .append($("<input/>")
-                .attr("type", "file")
-                .attr("class", "custom-file-input")
-                .attr("name", "teamimage")
-                .attr("id", "teamimage")
-                .attr("aria-describedby", "inputGroupFileAddon01"))
-            .append($("<label/>")
-                .attr("class", "custom-file-label")
-                .attr("for", "inputGroupFile01")
-                .attr("text", "Choose file"))))
+        .append($("<input/>")
+            .attr("type", "file")
+            .attr("name", "teamimage")
+            .attr("id", "teamimage"))
+        .append($("<label/>")
+            .attr("for", "teamimage")))
 
     // Gender selection radio box
     $("#newTeamForm").append($("<div>")
@@ -708,6 +697,7 @@ function submitRegForm(leagueCode, theForm) {
  *  and read the error status and build error message appropriately
  * @param: None
  * Calls: validate()
+ * called by: submitRegForm() submitEditForm()
  */
 function validateForm(team) {
     let temp = "";
@@ -720,7 +710,8 @@ function validateForm(team) {
         maxteammembers: "",
         minmemberage: "",
         maxmemberage: "",
-        teamgender: ""
+        teamgender: "",
+        teamlogo: ""
     };
     inputData.teamname = $("#teamname").val();
     inputData.leaguecode = $("#leaguecode").val();
@@ -731,6 +722,19 @@ function validateForm(team) {
     inputData.minmemberage = $("#minmemberage").val();
     inputData.maxmemberage = $("#maxmemberage").val();
     inputData.teamgender = $("input[name=teamgender]:checked").val();
+    //team is not defined during registration of team and defined during editing a team
+    // values are populated accordingly for image upload
+    if (team == undefined) {
+        if ($("#teamimage").val() != "") {
+            inputData.teamlogo = $("#teamimage")[0].files[0].name;
+        } else {
+            inputData.teamlogo = "";
+        }
+    } else {
+        // Executed during editing team details, populated from team and it is not editable during editing team
+        inputData.teamlogo = team.TeamLogo;
+    }
+
     // Send input form data and create javascript object
     let resp = validate(inputData, team);
 

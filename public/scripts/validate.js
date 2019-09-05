@@ -118,18 +118,26 @@ function validate(inputData, team) {
         resp.errorMsg[resp.errorMsg.length] = "Maximum allowed age is not older than 40";
     }
 
-    //Team age validation against existing member
-    if (team != undefined & team.Members.length > 0) {
-        let minAge = getMinAgeOfMember(team);
-        let maxAge = getMaxAgeOfMember(team);
+    //Team image validation
+    if (inputData.teamlogo.trim() == "") {
+        resp.errorMsg[resp.errorMsg.length] = "Please select Team Logo";
+    }
 
-        if (Number(inputData.minmemberage) > minAge) {
-            resp.errorMsg[resp.errorMsg.length] = `Age limit is lower than already enrolled minimum member ${minAge}`;
-        }
-        if (Number(inputData.maxmemberage) < maxAge) {
-            resp.errorMsg[resp.errorMsg.length] = `Age limit is higher than already enrolled member age ${maxAge}`;
+    //Team age validation against existing member
+    if (team != undefined) {
+        if (team.Members.length > 0) {
+            let minAge = getMinAgeOfMember(team);
+            let maxAge = getMaxAgeOfMember(team);
+
+            if (Number(inputData.minmemberage) > minAge) {
+                resp.errorMsg[resp.errorMsg.length] = `Age limit is lower than already enrolled minimum member ${minAge}`;
+            }
+            if (Number(inputData.maxmemberage) < maxAge) {
+                resp.errorMsg[resp.errorMsg.length] = `Age limit is higher than already enrolled member age ${maxAge}`;
+            }
         }
     }
+
     // Validate and populate error message
     if (resp.errorMsg.length > 0) {
         resp.status = true;
@@ -140,6 +148,8 @@ function validate(inputData, team) {
 // ------ Membership change conflict helpers ------------------
 /*function is to calculate the minimum age of existing members
  * @param team (javastring object) - contains team data
+ * calls: None
+ * called by: validate()
  */
 function getMinAgeOfMember(team) {
     let minAge = 100000;
@@ -153,6 +163,8 @@ function getMinAgeOfMember(team) {
 
 /*function is to calculate the maximum age of existing members
  * @param team (javastring object) - contains team data
+ * calls: None
+ * called by: validate()
  */
 function getMaxAgeOfMember(team) {
     let maxAge = -1;
