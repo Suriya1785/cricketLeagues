@@ -542,6 +542,7 @@ function getRegTeam(leaguesLocalStorage) {
     // Submit the form to server & add team with image 
     $("#newTeamForm").on("submit", function(e) {
         e.preventDefault();
+        $("#errorMsgId").empty();
         submitRegForm($("#leaguecode").val(), this);
     })
 
@@ -571,6 +572,7 @@ function getRegTeam(leaguesLocalStorage) {
                 .html("Cancel")
                 .on("click", function(e) {
                     e.preventDefault();
+                    $("#errorMsgId").empty();
                     let leagueSelection = sessionStorage.getItem("leagueSelSession");
                     getleagueSection(leagueSelection);
                 }))))

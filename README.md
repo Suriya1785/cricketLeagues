@@ -44,7 +44,7 @@ This assumes that the user has Node.js installed globally on their machine.
 ###### Main Folder:
 C:>cricketLeagues place the server.js under here
 
-###### subfolders under RelaxingSPA:
+###### subfolders under cricketLeagues:
 data (where the JSON data files would be placed) public (this is your "root" directory)
 
 ###### subfolders under public: 
